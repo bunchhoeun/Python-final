@@ -1,0 +1,578 @@
+{% extends "admin/layout/layout.html" %}
+
+<!-- ============================================================== -->
+<!-- Start Page Content here -->
+<!-- ============================================================== -->
+{% block content %}
+
+    <main class="p-6">
+        <div class="flex flex-col gap-6">
+
+        </div>
+
+        <div class="flex flex-col gap-6">
+
+            <div class="grid xl:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-6">
+                <div class="card">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-11">
+                            <h4 class="card-title">Total Revenue</h4>
+                            <h4 class="card-title">Total Revenue</h4>
+
+                            <div class="z-10">
+                                <button data-fc-target="dropdown-target1" data-fc-type="dropdown" type="button"
+                                        data-fc-placement="bottom-end">
+                                    <i class="mdi mdi-dots-vertical text-xl"></i>
+                                </button>
+
+                                <div id="dropdown-target1"
+                                     class="hidden bg-white shadow rounded border dark:border-slate-700 fc-dropdown-open:translate-y-0 translate-y-3 origin-center transition-all duration-300 py-2 dark:bg-gray-800">
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-stone-100 dark:hover:bg-slate-700 dark:hover:text-gray-200"
+                                       href="javascript:void(0)">
+                                        Action
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Another action
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Something else
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Separated link
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div dir="ltr">
+                                <input data-plugin="knob" data-width="70" data-height="70" data-fgColor="#f05050 "
+                                       data-bgColor="#F9B9B9" value="58" data-skin="tron" data-angleOffset="180"
+                                       data-readOnly=true data-thickness=".15"/>
+                            </div>
+
+                            <div class="text-end">
+                                <h2 class="text-3xl font-normal text-gray-800 dark:text-white mb-1"> 256 </h2>
+                                <p class="text-gray-400 font-normal">Revenue today</p>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- card-end -->
+
+                <div class="card">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h4 class="card-title">Sales Analytics</h4>
+
+                            <div>
+                                <button data-fc-target="dropdown-target2" data-fc-type="dropdown" type="button"
+                                        data-fc-placement="bottom-end">
+                                    <i class="mdi mdi-dots-vertical text-xl"></i>
+                                </button>
+
+                                <div id="dropdown-target2"
+                                     class="hidden bg-white shadow rounded border dark:border-slate-700 fc-dropdown-open:translate-y-0 translate-y-3 origin-center transition-all duration-300 py-2 dark:bg-gray-800">
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-stone-100 dark:hover:bg-slate-700 dark:hover:text-gray-200"
+                                       href="javascript:void(0)">
+                                        Action
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Another action
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Something else
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Separated link
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div class="bg-success text-white rounded-full text-xs px-2 py-0.5">32% <i
+                                    class="mdi mdi-trending-up"></i></div>
+
+                            <div class="text-end">
+                                <h2 class="text-3xl font-normal text-gray-800 dark:text-white mb-1"> 8451 </h2>
+                                <p class="text-gray-400 font-normal">Revenue today</p>
+                            </div>
+
+                        </div>
+
+                        <div class="flex w-full h-[5px] bg-gray-200 rounded-full overflow-hidden dark:bg-gray-700 mt-6">
+                            <div class="flex flex-col justify-center overflow-hidden bg-success" role="progressbar"
+                                 style="width: 75%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="flex flex-col justify-center overflow-hidden bg-success/10"
+                                 role="progressbar" style="width: 25%" aria-valuenow="15" aria-valuemin="0"
+                                 aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div> <!-- card-end -->
+
+                <div class="card">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-11">
+                            <h4 class="card-title">Statistics</h4>
+
+                            <div class="z-10">
+                                <button data-fc-target="dropdown-target3" data-fc-type="dropdown" type="button"
+                                        data-fc-placement="bottom-end">
+                                    <i class="mdi mdi-dots-vertical text-xl"></i>
+                                </button>
+
+                                <div id="dropdown-target3"
+                                     class="hidden bg-white shadow rounded border dark:border-slate-700 fc-dropdown-open:translate-y-0 translate-y-3 origin-center transition-all duration-300 py-2 dark:bg-gray-800">
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-stone-100 dark:hover:bg-slate-700 dark:hover:text-gray-200"
+                                       href="javascript:void(0)">
+                                        Action
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Another action
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Something else
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Separated link
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div class="widget-chart-box-1" dir="ltr">
+                                <input data-plugin="knob" data-width="70" data-height="70" data-fgColor="#ffbd4a"
+                                       data-bgColor="#FFE6BA" value="80" data-skin="tron" data-angleOffset="180"
+                                       data-readOnly=true data-thickness=".15"/>
+                            </div>
+
+                            <div class="text-end">
+                                <h2 class="text-3xl font-normal text-gray-800 dark:text-white mb-1"> 4569 </h2>
+                                <p class="text-gray-400 font-normal">Revenue today</p>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- card-end -->
+
+                <div class="card">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h4 class="card-title">Daily Sales</h4>
+
+                            <div>
+                                <button data-fc-target="dropdown-target4" data-fc-type="dropdown" type="button"
+                                        data-fc-placement="bottom-end">
+                                    <i class="mdi mdi-dots-vertical text-xl"></i>
+                                </button>
+
+                                <div id="dropdown-target4"
+                                     class="hidden bg-white shadow rounded border dark:border-slate-700 fc-dropdown-open:translate-y-0 translate-y-3 origin-center transition-all duration-300 py-2 dark:bg-gray-800">
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-stone-100 dark:hover:bg-slate-700 dark:hover:text-gray-200"
+                                       href="javascript:void(0)">
+                                        Action
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Another action
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Something else
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Separated link
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div class="bg-pink text-white rounded-full text-xs px-2 py-0.5">32% <i
+                                    class="mdi mdi-trending-up"></i></div>
+
+                            <div class="text-end">
+                                <h2 class="text-3xl font-normal text-gray-800 dark:text-white mb-1"> 158 </h2>
+                                <p class="text-gray-400 font-normal">Revenue today</p>
+                            </div>
+
+                        </div>
+
+                        <div class="flex w-full h-[5px] bg-gray-200 rounded-full overflow-hidden dark:bg-gray-700 mt-6">
+                            <div class="flex flex-col justify-center overflow-hidden bg-pink" role="progressbar"
+                                 style="width: 75%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="flex flex-col justify-center overflow-hidden bg-pink/10" role="progressbar"
+                                 style="width: 25%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div> <!-- card-end -->
+            </div> <!-- grid-end -->
+
+            <div class="grid xl:grid-cols-3 grid-cols-1 gap-6">
+                <div class="card">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h4 class="card-title">Daily Sales</h4>
+
+                            <div class="z-10">
+                                <button data-fc-target="dropdown-target7" data-fc-type="dropdown" type="button"
+                                        data-fc-placement="bottom-end">
+                                    <i class="mdi mdi-dots-vertical text-xl"></i>
+                                </button>
+
+                                <div id="dropdown-target7"
+                                     class="hidden bg-white shadow rounded border dark:border-slate-700 fc-dropdown-open:translate-y-0 translate-y-3 origin-center transition-all duration-300 py-2 dark:bg-gray-800">
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-stone-100 dark:hover:bg-slate-700 dark:hover:text-gray-200"
+                                       href="javascript:void(0)">
+                                        Action
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Another action
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Something else
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Separated link
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="widget-chart text-center">
+                            <div id="morris-donut-example" dir="ltr" style="height: 238px;"
+                                 class="morris-chart"></div>
+                            <ul class="list-inline chart-detail-list mb-0">
+                                <li class="list-inline-item">
+                                    <h5 style="color: #ff8acc;"><i class="fa fa-circle me-1"></i>Series A</h5>
+                                </li>
+                                <li class="list-inline-item">
+                                    <h5 style="color: #5b69bc;"><i class="fa fa-circle me-1"></i>Series B</h5>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div> <!-- card-end -->
+
+                <div class="card">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h4 class="card-title">Statistics</h4>
+
+                            <div class="z-10">
+                                <button data-fc-target="dropdown-target8" data-fc-type="dropdown" type="button"
+                                        data-fc-placement="bottom-end">
+                                    <i class="mdi mdi-dots-vertical text-xl"></i>
+                                </button>
+
+                                <div id="dropdown-target8"
+                                     class="hidden bg-white shadow rounded border dark:border-slate-700 fc-dropdown-open:translate-y-0 translate-y-3 origin-center transition-all duration-300 py-2 dark:bg-gray-800">
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-stone-100 dark:hover:bg-slate-700 dark:hover:text-gray-200"
+                                       href="javascript:void(0)">
+                                        Action
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Another action
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Something else
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Separated link
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="morris-bar-example" dir="ltr" style="height: 280px;" class="morris-chart"></div>
+                    </div>
+                </div> <!-- card-end -->
+
+                <div class="card">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h4 class="card-title">Total Revenue</h4>
+
+                            <div class="z-10">
+                                <button data-fc-target="dropdown-target9" data-fc-type="dropdown" type="button"
+                                        data-fc-placement="bottom-end">
+                                    <i class="mdi mdi-dots-vertical text-xl"></i>
+                                </button>
+
+                                <div id="dropdown-target9"
+                                     class="hidden bg-white shadow rounded border dark:border-slate-700 fc-dropdown-open:translate-y-0 translate-y-3 origin-center transition-all duration-300 py-2 dark:bg-gray-800">
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-stone-100 dark:hover:bg-slate-700 dark:hover:text-gray-200"
+                                       href="javascript:void(0)">
+                                        Action
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Another action
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Something else
+                                    </a>
+                                    <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                       href="javascript:void(0)">
+                                        Separated link
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="morris-line-example" dir="ltr" style="height: 280px;" class="morris-chart"></div>
+                    </div>
+                </div> <!-- card-end -->
+            </div> <!-- grid-end -->
+
+            <div class="grid xl:grid-cols-3 grid-cols-1 gap-6">
+
+                <div class="xl:col-span-4 col-span-1">
+                    <div class="card">
+                        <div class="p-6">
+
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="card-title">Latest Projects</h3>
+
+                                <div>
+                                    <button data-fc-target="dropdown-target6" data-fc-type="dropdown" type="button"
+                                            data-fc-placement="bottom-end">
+                                        <i class="mdi mdi-dots-vertical text-xl"></i>
+                                    </button>
+
+                                    <div id="dropdown-target6"
+                                         class="hidden bg-white shadow rounded border dark:border-slate-700 fc-dropdown-open:translate-y-0 translate-y-3 origin-center transition-all duration-300 py-2 dark:bg-gray-800">
+                                        <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-stone-100 dark:hover:bg-slate-700 dark:hover:text-gray-200"
+                                           href="javascript:void(0)">
+                                            Action
+                                        </a>
+                                        <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                           href="javascript:void(0)">
+                                            Another action
+                                        </a>
+                                        <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                           href="javascript:void(0)">
+                                            Something else
+                                        </a>
+                                        <a class="flex items-center py-1.5 px-5 text-sm transition-all duration-300 bg-transparent text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                                           href="javascript:void(0)">
+                                            Separated link
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <div class="min-w-full inline-block align-middle">
+                                    <div class="overflow-hidden">
+                                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                            <thead>
+                                            <tr class="border-b-2 dark:border-gray-700">
+                                                <th scope="col"
+                                                    class="px-4 py-4 text-start font-semibold text-gray-500 dark:text-gray-200">
+                                                    #
+                                                </th>
+                                                <th scope="col"
+                                                    class="px-4 py-4 text-start font-semibold text-gray-500 dark:text-gray-200">
+                                                    Project Name
+                                                </th>
+                                                <th scope="col"
+                                                    class="px-4 py-4 text-start font-semibold text-gray-500 dark:text-gray-200">
+                                                    Start Date
+                                                </th>
+                                                <th scope="col"
+                                                    class="px-4 py-4 text-start font-semibold text-gray-500 dark:text-gray-200">
+                                                    Due Date
+                                                </th>
+                                                <th scope="col"
+                                                    class="px-4 py-4 text-start font-semibold text-gray-500 dark:text-gray-200">
+                                                    Status
+                                                </th>
+                                                <th scope="col"
+                                                    class="px-4 py-4 text-start font-semibold text-gray-500 dark:text-gray-200">
+                                                    Assign
+                                                </th>
+                                            </tr>
+                                            </thead>
+
+                                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                            <tr class="transition-all hover:bg-gray-50 dark:hover:bg-gray-700/40">
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    1
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    Adminto Admin v1
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    01/01/2017
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    26/04/2017
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    <span class="text-xs text-white bg-danger rounded-md px-1 py-0.5">Released</span>
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    Coderthemes
+                                                </td>
+                                            </tr>
+
+                                            <tr class="transition-all hover:bg-gray-50 dark:hover:bg-gray-700/40">
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    2
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    Adminto Frontend v1
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    01/01/2017
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    26/04/2017
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    <span class="text-xs text-white bg-success rounded-md px-1 py-0.5">Released</span>
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    Adminto admin
+                                                </td>
+                                            </tr>
+
+                                            <tr class="transition-all hover:bg-gray-50 dark:hover:bg-gray-700/40">
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    3
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    Adminto Admin v1.1
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    01/05/2017
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    10/05/2017
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    <span class="text-xs text-white bg-pink rounded-md px-1 py-0.5">Pending</span>
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    Coderthemes
+                                                </td>
+                                            </tr>
+
+                                            <tr class="transition-all hover:bg-gray-50 dark:hover:bg-gray-700/40">
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    4
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    Adminto Frontend v1.1
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    01/01/2017
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    31/05/2017
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    <span class="text-xs text-white bg-purple rounded-md px-1 py-0.5">Work in Progress</span>
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    Adminto admin
+                                                </td>
+                                            </tr>
+
+                                            <tr class="transition-all hover:bg-gray-50 dark:hover:bg-gray-700/40">
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    5
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    Adminto Admin v1.3
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    01/01/2017
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    31/05/2017
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    <span class="text-xs text-white bg-warning rounded-md px-1 py-0.5">Coming soon</span>
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    Coderthemes
+                                                </td>
+                                            </tr>
+
+                                            <tr class="transition-all hover:bg-gray-50 dark:hover:bg-gray-700/40">
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    6
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    Adminto Admin v1.3
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    01/01/2017
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    31/05/2017
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    <span class="text-xs text-white bg-primary rounded-md px-1 py-0.5">Coming soon</span>
+                                                </td>
+                                                <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                                    Adminto admin
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- card-end -->
+            </div> <!-- grid-end -->
+
+        </div> <!-- flex-end -->
+
+    </main>
+    {% block customJs %}
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <script type="text/javascript">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        {% if category == 'success' %}
+                            var message = '{{ message|tojson }}'.slice(1, -1).replace(/\n/g, '<br>');
+                            Swal.fire({
+                                position: "top-end",
+                                icon: 'success',
+                                title: 'Success',
+                                html: message,
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </script>
+    {% endblock %}
+
+{% endblock %}

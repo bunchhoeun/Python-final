@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" style="background-color: #6B6464">
+
+<head>
+    <meta charset="utf-8">
+    <title>Login | Adminto - Tailwind HTML Admin Dashboard Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="Adminto - Tailwind HTML Admin Dashboard Template, A fully featured admin theme which can be used to build CRM, CMS, etc."
+          name="description">
+    <meta content="coderthemes" name="author">
+
+    {% include 'admin/layout/styles.html' %}
+
+</head>
+
+<body >
+
+<!-- ============================================================== -->
+<!-- Start Page Content here -->
+<!-- ============================================================== -->
+
+<div style="background-color: #6B6464">
+    <div class="relative flex flex-col items-center justify-start py-20 h-screen">
+
+
+        <div class="flex justify-center">
+            <div class="max-w-lg px-4 mx-auto">
+
+                <div class="card overflow-hidden">
+                    <div class="p-8" style="background-color: #3c3f40">
+
+                        <div class="text-center mx-auto w-full">
+                            <h4 class="text-center text-lg uppercase font-bold mb-8">Sign In</h4>
+                        </div>
+                        <form action="{{ url_for('admin_login') }}" method="POST" class="sm:w-80" novalidate>
+                            <!-- Flash Messages Section -->
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% if messages %}
+                                    {% for category, message in messages %}
+                                        {% if category == 'danger' %}
+                                            <div id="dismiss-example-danger"
+                                                 class="border bg-danger/10 text-danger border-danger/20 rounded-md py-3 px-5 flex justify-between items-center mb-6">
+                                                <p>
+                                                    <span class="font-bold">Danger</span> - {{ message }}
+                                                </p>
+                                                <button class="text-xl/[0]" data-fc-dismiss="dismiss-example-danger"
+                                                        type="button">
+                                                    <i class="mdi mdi-close text-xl text-gray-400"></i>
+                                                </button>
+                                            </div>
+                                        {% elif category == 'success' %}
+                                            <div id="dismiss-example-success"
+                                                 class="border bg-success/10 text-success border-success/20 rounded-md py-3 px-5 flex justify-between items-center mb-6">
+                                                <p>
+                                                    <span class="font-bold">Success</span> - {{ message }}
+                                                </p>
+                                                <button class="text-xl/[0]" data-fc-dismiss="dismiss-example-success"
+                                                        type="button">
+                                                    <i class="mdi mdi-close text-xl text-gray-400"></i>
+                                                </button>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            {% endwith %}
+
+
+                            <!-- Email Input -->
+                            <div class="mb-6 space-y-2">
+                                <label for="emailaddress" class="font-medium text-gray-500">Email Address</label>
+                                <input
+                                        type="email"
+                                        id="emailaddress"
+                                        name="email"
+                                        class="form-input w-full placeholder:text-gray-400"
+                                        placeholder="Enter your email"
+                                        value="{{ request.args.get('email','') }}"
+                                >
+                            </div>
+
+                            <!-- Password Input -->
+                            <div class="mb-6 space-y-2">
+                                <label for="password" class="font-medium text-gray-500">Password</label>
+                                <input
+                                        type="password"
+                                        id="password"
+                                        name="password"
+                                        class="form-input w-full placeholder:text-gray-400"
+                                        placeholder="Enter your password"
+                                >
+                            </div>
+
+                            <!-- Remember Me Checkbox -->
+                            <div class="mb-6">
+                                <div class="flex items-center">
+                                    <input
+                                            type="checkbox"
+                                            class="form-checkbox rounded text-primary"
+                                            id="checkbox-signin"
+                                            name="remember"
+                                            checked
+                                    >
+                                    <label for="checkbox-signin" class="font-medium text-gray-500 ms-2">Remember
+                                        Me</label>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="text-center mb-6">
+                                <button class="btn bg-primary w-full text-white hover:bg-primary-dark" type="submit">
+                                    Log In
+                                </button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div> <!-- card end -->
+
+
+            </div>
+        </div> <!-- flex end -->
+
+    </div> <!-- flex end -->
+</div> <!-- bg end -->
+
+<!-- ============================================================== -->
+<!-- End Page content -->
+<!-- ============================================================== -->
+{% include 'admin/layout/scripts.html' %}
+
+</body>
+
+</html>

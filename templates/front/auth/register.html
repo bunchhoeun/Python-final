@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href="dist/images/logo.svg" rel="shortcut icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+          content="Icewall admin is super flexible, powerful, clean & modern responsive tailwind admin template with unlimited possibilities.">
+    <meta name="keywords"
+          content="admin template, Icewall Admin Template, dashboard template, flat admin template, responsive admin template, web app">
+    <meta name="author" content="LEFT4CODE">
+    <title>POS login</title>
+    <!-- BEGIN: CSS Assets-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='front/assets/css/app.css') }}"/>
+    <!-- END: CSS Assets-->
+</head>
+<<body class="flex items-center justify-center min-h-screen bg-gray-200">
+    <div class="container sm:px-10 flex items-center justify-center min-h-screen" id="app">
+        <div class="block xl:grid grid-cols-1 gap-4 w-full sm:w-3/4 lg:w-2/4">
+            <!-- BEGIN: Register Form -->
+            <div class="flex items-center justify-center">
+                <div class="bg-gray-900 dark:bg-darkmode-600 px-5 sm:px-8 py-8 rounded-md shadow-md w-full">
+                    <h2 class="font-bold text-2xl xl:text-3xl text-center text-white">
+                        Sign Up
+                    </h2>
+                    <form ref="form" class="mt-8" @submit.prevent="handleSubmit" novalidate>
+                        <input type="text" v-model="form.first_name"
+                               class="form-control py-3 px-4 block w-full" placeholder="First Name">
+                        <div v-if="v$.form.first_name.$invalid && v$.form.first_name.$dirty"
+                             class="mt-2 text-xs text-red-500">
+                            [[ v$.form.first_name.$errors[0].$message ]]
+                        </div>
+
+                        <input type="text" v-model="form.last_name"
+                               class="form-control py-3 px-4 block w-full mt-4" placeholder="Last Name">
+                        <div v-if="v$.form.last_name.$invalid && v$.form.last_name.$dirty"
+                             class="mt-2 text-xs text-red-500">
+                            [[ v$.form.last_name.$errors[0].$message ]]
+                        </div>
+
+                        <input type="text" v-model="form.email"
+                               class="form-control py-3 px-4 block w-full mt-4" placeholder="Email">
+                        <div v-if="v$.form.email.$invalid && v$.form.email.$dirty"
+                             class="mt-2 text-xs text-red-500">
+                            [[ v$.form.email.$errors[0].$message ]]
+                        </div>
+
+                        <div v-if="error" class="mt-2 text-xs text-red-500">
+                            [[ error ]]
+                        </div>
+
+                        <input type="password" v-model="form.password" id="password" name="password"
+                               class="form-control py-3 px-4 block w-full mt-4" placeholder="Password">
+                        <div v-if="v$.form.password.$invalid && v$.form.password.$dirty"
+                             class="mt-2 text-xs text-red-500">
+                            [[ v$.form.password.$errors[0].$message ]]
+                        </div>
+
+                        <input type="password" v-model="passwordConfirmation"
+                               class="form-control py-3 px-4 block w-full mt-4" placeholder="Password Confirmation">
+                        <div v-if="passwordConfirmation && form.password !== passwordConfirmation"
+                             class="mt-2 text-xs text-red-500">
+                            Passwords do not match.
+                        </div>
+
+
+                        <div class="mt-5 text-center">
+                            <button :disabled="form.password !== passwordConfirmation" type="submit"
+                                    class="btn btn-outline-secondary py-3 px-4 w-full mt-3 text-white bg-green-600 hover:bg-green-500">
+                                Register
+                            </button>
+                            <a href="/login"
+                               class="btn btn-outline-secondary py-3 px-4 w-full mt-3 text-white bg-gray-600 hover:bg-gray-500">
+                                Sign In
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- END: Register Form -->
+        </div>
+    </div>
+
+
+<!-- BEGIN: JS Assets-->
+<script src="{{ url_for('static', filename='front/assets/js/app.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-demi"></script>
+<script src="https://cdn.jsdelivr.net/npm/@vuelidate/core"></script>
+<script src="https://cdn.jsdelivr.net/npm/@vuelidate/validators"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+    const {createApp} = Vue;
+    const {useVuelidate} = Vuelidate;
+    const {required, minLength, maxLength, email, helpers} =
+        VuelidateValidators;
+
+    const app = createApp({
+        el: '#app',
+        delimiters: ['[[', ']]'],
+        data() {
+            return {
+                form: {
+                    first_name: '',
+                    last_name: '',
+                    email: '',
+                    password: '',
+                },
+                passwordConfirmation: '',
+                strengthBars: [
+                    {class: 'bg-slate-300'},
+                    {class: 'bg-slate-300'},
+                    {class: 'bg-slate-300'},
+                    {class: 'bg-slate-300'},
+                ],
+                passwordStrength: '',
+                passwordStrengthClass: '',
+                error: '', // To store the error message from the backend
+
+            }
+        },
+        watch:
+            {
+                'form.password'(newPassword) {
+                    this.updatePasswordStrength(newPassword);
+                }
+                ,
+            }
+        ,
+        validations() {
+            return {
+                form: {
+                    first_name: {
+                        required: helpers.withMessage("First name is required", required),
+                        maxLength: helpers.withMessage(
+                            "First name must be less than 50 characters",
+                            maxLength(50)
+                        ),
+                    },
+                    last_name: {
+                        required: helpers.withMessage("Last name is required", required),
+                        maxLength: helpers.withMessage(
+                            "Last name must be less than 50 characters",
+                            maxLength(50)
+                        ),
+                    },
+                    email: {
+                        required: helpers.withMessage("Email is required", required),
+                        email: helpers.withMessage("Invalid email format", email),
+                    },
+                    password: {
+                        required: helpers.withMessage("Password is required", required),
+                        minLength: helpers.withMessage(
+                            "Last name must be at least 8 characters",
+                            minLength(8)
+                        ),
+                    },
+                },
+            };
+        },
+        setup() {
+            return {
+                v$: useVuelidate(),
+            };
+        },
+        methods: {
+            updatePasswordStrength(password) {
+                const strength = this.checkPasswordStrength(password);
+
+                // Update the strength bars based on password strength
+                this.strengthBars.forEach((bar, index) => {
+                    if (index < strength.level) {
+                        bar.class = this.getStrengthColor(strength.level);
+                    } else {
+                        bar.class = 'bg-slate-300';
+                    }
+                });
+
+                // Set the password strength text and class
+                this.passwordStrength = strength.text;
+                this.passwordStrengthClass = strength.class;
+            },
+            checkPasswordStrength(password) {
+                let strength = 0;
+                let strengthText = '';
+                let strengthClass = '';
+
+                // Check password length
+                if (password.length >= 8) strength++;
+
+                // Check for uppercase letters
+                if (/[A-Z]/.test(password)) strength++;
+
+                // Check for numbers
+                if (/\d/.test(password)) strength++;
+
+                // Check for special characters
+                if (/[\W_]/.test(password)) strength++;
+
+                // Determine password strength text and class based on combination
+                if (strength === 1) {
+                    strengthText = 'Weak';
+                    strengthClass = 'text-red-500';
+                } else if (strength === 2) {
+                    strengthText = 'Medium';
+                    strengthClass = 'text-yellow-500';
+                } else if (strength === 3) {
+                    strengthText = 'Strong';
+                    strengthClass = 'text-green-500';
+                } else if (strength === 4) {
+                    strengthText = 'Very Strong';
+                    strengthClass = 'text-blue-500';
+                }
+
+                return {level: strength, text: strengthText, class: strengthClass};
+            },
+            getStrengthColor(strength) {
+                if (strength === 1) return 'bg-danger';
+                if (strength === 2) return 'bg-warning';
+                if (strength === 3) return 'alert-success-soft';
+                return 'bg-success';
+            },
+            async handleSubmit() {
+                this.v$.$touch();
+                if (this.v$.$invalid) return;
+
+                try {
+                    const response = await axios.post('/register', this.form);
+
+                    // On success, redirect to the URL provided by the backend
+                    if (response.data.redirect) {
+                        window.location.href = response.data.redirect;
+                    }
+                } catch (err) {
+                    if (err.response && err.response.data.redirect) {
+                        // Redirect on error with flashed message
+                        window.location.href = err.response.data.redirect;
+                    } else {
+                        console.error("An unexpected error occurred.");
+                    }
+                }
+            }
+        },
+    });
+    app.mount("#app");
+
+</script>
+
+<!-- END: JS Assets-->
+</body>
+</html>

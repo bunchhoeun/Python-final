@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en" style="background-color: #6B6464">
+<!-- BEGIN: Head -->
+<head>
+    <meta charset="utf-8">
+    <link href="dist/images/logo.svg" rel="shortcut icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+          content="Icewall admin is super flexible, powerful, clean & modern responsive tailwind admin template with unlimited possibilities.">
+    <meta name="keywords"
+          content="admin template, Icewall Admin Template, dashboard template, flat admin template, responsive admin template, web app">
+    <meta name="author" content="LEFT4CODE">
+    <title>Point of Sale - Midone - Tailwind HTML Admin Template</title>
+    <!-- BEGIN: CSS Assets-->
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='front/assets/css/app.css') }}"/>
+
+    <!-- SweetAlert2 main CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css" rel="stylesheet">
+
+    <!-- SweetAlert2 Dark Theme CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark/dark.css" rel="stylesheet">
+    <style>
+        .nav-link:active, .nav-link:focus {
+            background-color: orange;
+            color: white; /* Optional: change text color */
+        }
+
+        .nav-link:hover {
+            background-color: orange; /* Change color on hover if needed */
+            color: white; /* Optional: change text color */
+        }
+    </style>
+    <!-- END: CSS Assets-->
+</head>
+<!-- END: Head -->
+<body class="main">
+<marquee style="color:orange; font-size: 28px;"> Molobber POS</marquee>
+<!-- BEGIN: Content -->
+{#<div class="wrapper wrapper--top-nav">#}
+<div class="wrapper-box">
+    <!-- BEGIN: Content -->
+    <div id="app" v-cloak>
+        <div class="intro-y grid grid-cols-12 gap-3 mt-3">
+            <!-- BEGIN: Item List -->
+            <div class="intro-y col-span-12 lg:col-span-8 ">
+                <div class="lg:flex intro-y">
+                    <div class="relative">
+                        <input v-model="searchQuery"
+                               @input="filterProducts"
+                               type="text"
+                               class="form-control py-3 px-4 w-full lg:w-64 box pr-10"
+                               placeholder="Search item...">
+                        <i class="w-4 h-4 absolute my-auto inset-y-0 mr-3 right-0 text-slate-500 float-right"
+                           data-lucide="search"></i>
+                    </div>
+                </div>
+                <!-- BEGIN: category List -->
+                <div class="grid grid-cols-12 gap-5 mt-5">
+                    <a @click="filterByCategory(category.id)" href="javascript:;" v-for="category in categories"
+                       :class="['col-span-12 sm:col-span-4 2xl:col-span-3 box  p-5 cursor-pointer zoom-in',
+                        { 'bg-warning': category.id === selectedCategoryId }]">
+                        <div :class="['font-medium text-base', { 'text-white': category.id === selectedCategoryId }]">
+                            [[category.name]]
+                        </div>
+                        <div class="text-white text-opacity-80 dark:text-slate-500">[[category.product_count]] Items
+                        </div>
+                    </a>
+                </div>
+                <div class="grid grid-cols-12 gap-5 mt-5 pt-5  bg-black">
+                    <a @click="addToCart(product)" v-show="products.length > 0 && !loading" v-for="product in products"
+                       href="javascript:;"
+                       :class="['intro-y', 'block', 'col-span-12', 'sm:col-span-4', '2xl:col-span-3', { 'loading': loading }]">
+                        <div class="box rounded-md p-3 relative zoom-in">
+                            <div class="flex-none relative block before:block before:w-full before:pt-[100%]">
+                                <div class="absolute top-0 left-0 w-full h-full image-fit">
+                                    <img alt="Midone - HTML Admin Template" class="rounded-md"
+                                         :src="'/static/upload/product/crop/'+ product.image">
+                                </div>
+                            </div>
+                            <div class="block font-medium text-center truncate mt-3">[[product.name]]</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <!-- END: Item List -->
+            <!-- BEGIN: Ticket -->
+            <div class="col-span-12 lg:col-span-4">
+                <div class="intro-y pr-1">
+                    <div class="box p-2">
+                        <ul class="nav nav-pills" role="tablist">
+                            <li id="ticket-tab" class="nav-item flex-1" role="presentation">
+                                <button class="nav-link w-full py-2 active" data-tw-toggle="pill"
+                                        data-tw-target="#ticket"
+                                        type="button" role="tab" aria-controls="ticket" aria-selected="false"> Order
+                                </button>
+                            </li>
+                            <li id="details-tab" class="nav-item flex-1" role="presentation">
+                                <button class="nav-link w-full py-2" data-tw-toggle="pill"
+                                        data-tw-target="#details" type="button" role="tab" aria-controls="details"
+                                        aria-selected="true"> Details
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="tab-content">
+                    <div id="ticket" class="tab-pane active">
+                        <div class="box p-1 mt-5">
+                            <!-- Header -->
+                            <div
+                                    v-if="selectedProduct.length > 0"
+                                    class="flex flex-wrap items-center justify-between p-3 bg-gray-100 dark:bg-darkmode-700 rounded-t-md font-bold text-slate-600 dark:text-slate-300"
+                            >
+                                <!-- Columns -->
+                                <div class="flex-1 truncate"><span class="block">Name</span></div>
+                                <div class="flex-none text-center w-16 sm:w-20"><span>Qty</span></div>
+                                <div class="flex-none text-center w-16 sm:w-20"><span>Cost</span></div>
+                                <div class="flex-none text-center w-16 sm:w-20"><span>Discount</span></div>
+                                <div class="flex-none text-center w-16 sm:w-20"><span>Price</span></div>
+                                <div class="flex-none text-center w-16 sm:w-20"><span>Amount</span></div>
+                                <div class="flex-none text-center w-12"><span>Action</span></div>
+                            </div>
+
+                            <!-- Scrollable Body -->
+                            <div v-if="selectedProduct.length > 0" class="overflow-y-auto max-h-96">
+                                <a
+                                        v-for="product in selectedProduct"
+                                        :key="product.id"
+                                        href="javascript:;"
+                                        class="flex flex-wrap items-center justify-between p-3 cursor-pointer transition duration-300 ease-in-out bg-white dark:bg-darkmode-600 hover:bg-slate-100 dark:hover:bg-darkmode-400 rounded-md"
+                                >
+                                    <!-- Columns -->
+                                    <div class="flex-1 truncate max-w-[40%] sm:max-w-full">
+                                        <div class="flex items-center">
+                                            <span class="block font-medium truncate">[[ product.name ]] x</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex-none text-center w-16 sm:w-20 text-slate-500 font-medium">
+                                        <input
+                                                type="number"
+                                                @change="updateTotal"
+                                                class="w-full border border-gray-300 rounded-md text-center text-gray-700 dark:text-gray-300 dark:bg-darkmode-600 dark:border-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                                                v-model="product.quantity"
+                                        />
+                                    </div>
+                                    <div class="flex-none text-center w-16 sm:w-20 text-slate-500 font-medium">$[[
+                                        product.cost ]]
+                                    </div>
+                                    <div class="flex-none text-center w-16 sm:w-20 text-slate-500 font-medium">%[[
+                                        product.discount || 0 ]]
+                                    </div>
+                                    <div class="flex-none text-center w-16 sm:w-20 text-slate-500 font-medium">$[[
+                                        product.price ]]
+                                    </div>
+                                    <div class="flex-none text-center w-16 sm:w-20 font-medium">$[[ (product.price *
+                                        product.quantity).toFixed(2) ]]
+                                    </div>
+                                    <button
+                                            @click.stop="deleteProduct(product)"
+                                            class="w-12 h-full flex justify-center items-center"
+                                    >
+                                        <div class="flex justify-center items-center w-10 btn btn-danger">
+                                            <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                    stroke-width="2"
+                                            >
+                                                <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        d="M3 6h18M9 6v12m6-12v12M4 6l1-1h14l1 1M5 6v12a2 2 0 002 2h10a2 2 0 002-2V6"
+                                                />
+                                            </svg>
+                                        </div>
+                                    </button>
+                                </a>
+                            </div>
+
+                            <!-- Empty Cart Message -->
+                            <div v-else class="items-center text-center p-3">There is no product in your Cart</div>
+                        </div>
+
+
+                        {#                        <div class="box flex p-5 mt-5">#}
+                        {#                            <input type="text"#}
+                        {#                                   class="form-control py-3 px-4 w-full bg-slate-100 border-slate-200/60 pr-10"#}
+                        {#                                   placeholder="Use coupon code...">#}
+                        {#                            <button class="btn btn-primary ml-2">Apply</button>#}
+                        {#                        </div>#}
+                        <div class="box p-5 mt-5">
+                            <div class="flex">
+                                <div class="mr-auto">Total</div>
+                                <div class="font-medium">$[[ total.toFixed(2) ]]</div>
+                            </div>
+                            {#                            <div class="flex mt-4">#}
+                            {#                                <div class="mr-auto">Discount</div>#}
+                            {#                                <div class="font-medium text-danger">-$20</div>#}
+                            {#                            </div>#}
+                            <div class="flex items-center mt-2">
+                                <div class="mr-2 whitespace-nowrap">Receive Amount $</div>
+                                <input
+                                        v-model="receivedAmount"
+                                        id="pos-form-4"
+                                        type="text"
+                                        class="form-control ml-2 w-full text-right"
+                                        @keypress="allowNumbersOnly"
+                                >
+                            </div>
+                            <div v-if="receivedAmount >= total"
+                                 class="flex mt-4 pt-4 border-t border-slate-200/60 dark:border-darkmode-400">
+                                <div class="mr-auto font-medium text-base">Total Charge</div>
+                                <div class="font-medium text-base">$[[(receivedAmount - total).toFixed(2)]]</div>
+                            </div>
+                        </div>
+                        <div class="flex mt-5">
+                            <button @click="clearCart" class="btn w-32 btn-danger">Cancel
+                            </button>
+                            <button @click="checkout" class="btn btn-primary w-32 shadow-md ml-auto">Charge</button>
+{#                            <button @click="filterByCategory(null)"#}
+{#                                    class="btn btn-warning w-32 shadow-md ml-auto">#}
+{#                                Clear results#}
+{#                            </button>#}
+                        </div>
+                    </div>
+                    <div id="details" class="tab-pane" role="tabpanel" aria-labelledby="details-tab">
+                        <div class="box p-5 mt-5">
+                            <div class="flex items-center border-b border-slate-200 dark:border-darkmode-400 pb-5">
+                                <div>
+                                    <div class="text-slate-500">Time</div>
+                                    <div class="mt-1">02/06/20 02:10 PM</div>
+                                </div>
+                                <i data-lucide="clock" class="w-4 h-4 text-slate-500 ml-auto"></i>
+                            </div>
+                            <div class="flex items-center border-b border-slate-200 dark:border-darkmode-400 py-5">
+                                <div>
+                                    <div class="text-slate-500">User</div>
+                                    <div class="mt-1">{{ current_user.name }}</div>
+                                </div>
+                                <i data-lucide="user" class="w-4 h-4 text-slate-500 ml-auto"></i>
+                            </div>
+                            <div class="flex items-center border-b border-slate-200 dark:border-darkmode-400 py-5">
+                                <div>
+                                    <div class="text-slate-500">Role</div>
+                                    <div class="mt-1">{{ 'User' if current_user.role == '0' else 'Admin' }}</div>
+                                </div>
+                                <i data-lucide="users" class="w-4 h-4 text-slate-500 ml-auto"></i>
+                            </div>
+                            {#                            <div class="flex items-center pt-5">#}
+                            {#                                <div>#}
+                            {#                                    <div class="text-slate-500">Table</div>#}
+                            {#                                    <div class="mt-1">21</div>#}
+                            {#                                </div>#}
+                            {#                                <i data-lucide="mic" class="w-4 h-4 text-slate-500 ml-auto"></i>#}
+                            {#                            </div>#}
+                            <div class="flex mt-5">
+                                <a href="{{ url_for('logout') }}"
+                                   class="btn btn-danger w-32 shadow-md ml-auto">Logout</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END: Ticket -->
+        </div>
+    </div>
+    <!-- END: Content -->
+</div>
+<!-- BEGIN: JS Assets-->
+<script src="{{ url_for('static', filename='front/assets/js/app.js') }}"></script>
+<!-- END: JS Assets-->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+
+<script>
+    $.LoadingOverlaySetup({
+        background: "rgba(255, 255, 255, 0.8)", // Set the background color with transparency
+        image: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><circle r="80" cx="500" cy="90"/><circle r="80" cx="500" cy="910"/><circle r="80" cx="90" cy="500"/><circle r="80" cx="910" cy="500"/><circle r="80" cx="212" cy="212"/><circle r="80" cx="788" cy="212"/><circle r="80" cx="212" cy="788"/><circle r="80" cx="788" cy="788"/></svg>', // Custom SVG image
+        imageAnimation: "2000ms", // Image animation duration
+        imageColor: "#202020", // Image color
+        imageAutoResize: true, // Resize image automatically
+        imageResizeFactor: 0.3, // Resize factor for the image
+        imageOrder: 1, // Image order
+        fontawesome: false, // Disable FontAwesome icons
+        text: "", // No text
+        textColor: "#202020", // Text color (if you add text)
+        textAutoResize: true, // Resize text automatically
+        textResizeFactor: 0.5, // Text resize factor
+        progress: false, // No progress bar
+        progressAutoResize: true, // Resize progress bar automatically
+        progressResizeFactor: 0.25, // Resize factor for the progress bar
+        progressColor: "#a0a0a0", // Progress bar color
+        progressOrder: 5, // Progress bar order
+        progressFixedPosition: false, // Disable fixed position for the progress bar
+        progressSpeed: 200, // Progress bar speed
+        size: 50, // Initial size of the overlay
+        maxSize: 120, // Max size of the overlay
+        minSize: 20, // Min size of the overlay
+        direction: "column", // Layout direction for items in the overlay
+        fade: 400, // Fade duration
+        resizeInterval: 50, // Resize interval
+        hideAfter: 5000 // Hide overlay after 5 seconds
+    });
+</script>
+<script type="text/javascript">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {% if category == 'success' %}
+                    var message = '{{ message|tojson }}'.slice(1, -1).replace(/\n/g, '<br>');
+                    Swal.fire({
+                        position: "top-end",
+                        icon: 'success',
+                        title: 'Success',
+                        html: message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</script>
+
+<script>
+    const {createApp} = Vue
+
+    createApp({
+        delimiters: ['[[', ']]'], // Change delimiters
+        data() {
+            return {
+                categories: [],
+                originalProducts: [],
+                products: [],
+                selectedCategoryId: null,
+                loading: false,
+                searchQuery: "",
+                selectedProduct: [],
+                total: 0,
+                receivedAmount: 0
+            }
+        },
+        watch: {
+            loading(newValue) {
+                if (newValue) {
+                    $.LoadingOverlay("show");
+                } else {
+                    // Hide loading overlay
+                    $.LoadingOverlay("hide");
+                }
+            }
+        },
+        mounted() {
+            this.getData();
+        },
+        methods: {
+            updateTotal() {
+                this.total = this.selectedProduct.reduce((total, product) => {
+                    const price = parseFloat(product.price) || 0;
+                    const quantity = parseInt(product.quantity) || 0;
+                    return total + price * quantity;
+                }, 0);
+            },
+            allowNumbersOnly(event) {
+                // Allow only digits (0-9) and control keys like Backspace
+                if (!/[0-9]/.test(event.key) && event.key !== 'Backspace') {
+                    event.preventDefault();
+                }
+            },
+            getData() {
+                this.loading = true;
+                axios.get('/api/getPOSData')
+                    .then(response => {
+                        this.categories = response.data.categories_list;
+                        this.products = response.data.products_list;
+                        this.originalProducts = [...this.products];
+                        this.loading = false;// Keep a copy of the original products for resetting the filter
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        this.message = 'Error loading data!';
+                    });
+            },
+            filterByCategory(selectedCategory) {
+                this.loading = true;
+                let filtered = [...this.originalProducts];
+                this.selectedCategoryId = selectedCategory;
+
+                if (selectedCategory) {
+                    filtered = filtered.filter(product => product.category_id === selectedCategory);
+                } else {
+                    this.products = [...this.originalProducts]; // Assuming you have a backup of the original products list
+                }
+                this.products = [...filtered];  // Directly update products with the filtered list
+                this.loading = false;
+            },
+            filterProducts() {
+                let filtered = [...this.originalProducts];
+
+                // Filter by category
+                if (this.selectedCategoryId) {
+                    filtered = filtered.filter(product => product.category_id === this.selectedCategoryId);
+                }
+
+                // Filter by search query
+                if (this.searchQuery) {
+                    filtered = filtered.filter(product => product.name.toLowerCase().includes(this.searchQuery.toLowerCase()));
+                }
+
+                this.products = [...filtered];
+
+                if (!this.searchQuery && !this.selectedCategoryId) {
+                    this.products = [...this.originalProducts];
+                }
+
+                if (!this.searchQuery && this.selectedCategoryId) {
+                    this.filterByCategory(this.selectedCategoryId)
+                }
+            },
+            addToCart(product) {
+                let current_product = {
+                    id: product.id,
+                    name: product.name,
+                    cost: product.cost,
+                    price: product.price,
+                    image: product.image,
+                    quantity: 1,
+                }
+
+                let found = this.selectedProduct.find(product => {
+                    return product.id === current_product.id
+                });
+
+                if (!found) {
+                    this.selectedProduct.push(current_product);
+                    console.log(this.selectedProduct)
+                } else {
+                    found.quantity++;
+                    console.log(this.selectedProduct)
+                }
+                this.updateTotal()
+            },
+            deleteProduct(product) {
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    icon: "warning",
+                    showDenyButton: true,
+                    {#showCancelButton: true,#}
+                    confirmButtonText: "Yes",
+                    customClass: {
+                        popup: 'swal2-dark' // Manually apply dark class if required
+                    }
+                }).then((result) => {
+                    /* Read more about isConfirmed, isDenied below */
+                    if (result.isConfirmed) {
+                        const index = this.selectedProduct.findIndex(p => p.id === product.id);
+                        if (index !== -1) {
+                            this.selectedProduct.splice(index, 1);  // Remove the product from the cart
+                        }
+                        Swal.fire({
+                            icon: "success",
+                            title: "Success",
+                            text: "Product removed successfully",
+                            customClass: {
+                                popup: 'swal2-dark' // Manually apply dark class if required
+                            }
+                        });
+                    } else if (result.isDenied) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: "Cancelled",
+                            customClass: {
+                                popup: 'swal2-dark' // Manually apply dark class if required
+                            }
+                        });
+                    }
+                });
+            },
+            clearCart() {
+                this.selectedProduct = [];
+                this.total = 0;
+                this.receivedAmount = 0;
+            },
+            checkout() {
+                if (this.selectedProduct.length === 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Cart is empty'
+                    });
+                    return;  // Exit the function if the cart is empty
+                }
+
+                if (this.receivedAmount <= 0 || this.receivedAmount < this.total) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Received amount must be greater than total and cannot be zero'
+                    });
+                    return;  // Exit the function if received amount is invalid
+                }
+
+                this.loading = true;
+                const saleData = {
+                    user_id: 1,
+                    items: this.selectedProduct,
+                    received_amount: this.receivedAmount,
+                    total_amount: this.total,
+                }
+                axios.post('/api/create_sale', saleData)
+                    .then(response => {
+                        if (response.data.success) {
+                            // Display success message
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Checkout Complete',
+                                text: response.data.message || 'Sale created successfully!'
+                            });
+                            this.clearCart(); // Clear the cart after successful checkout
+                        } else {
+                            // Display error message if success is false
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.data.error || 'Failed to create sale.'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        // Handle any errors that occur during the request
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: error.response?.data?.error || 'An unexpected error occurred.'
+                        });
+                    })
+                    .finally(() => {
+                        this.loading = false; // Reset the loading state
+                    });
+            }
+        }
+    }).mount('#app')
+</script>
+</body>
+</html>

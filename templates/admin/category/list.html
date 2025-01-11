@@ -1,0 +1,507 @@
+{% extends "admin/layout/layout.html" %}
+
+<!-- ============================================================== -->
+<!-- Start Page Content here -->
+<!-- ============================================================== -->
+{% block customCss %}
+    <link href="{{ url_for('static', filename='admin/assets/libs/gridjs/theme/mermaid.min.css') }}" rel="stylesheet"
+          type="text/css">
+    <link href="{{ url_for('static', filename='admin/assets/css/app.min.css') }}" rel="stylesheet" type="text/css">
+
+{% endblock %}
+
+{% block content %}
+
+    <main class="p-6" id="app" v-cloak>
+        <div class="card">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="card-title">Category</h3>
+                    <div>
+                        <!-- Trigger button to open modal -->
+                        <button @click="toggleCreateModal" type="button"
+                                class="btn border-pink text-pink hover:bg-pink hover:text-white">
+                            Create
+                        </button>
+
+                        <Transition name="slide-up" @before-enter="beforeEnter" @enter="enter" @leave="leave">
+                            <div v-show="isModalOpen" @click.self="toggleModal" v-cloak
+                                 class="w-full h-full fixed top-0 left-0 z-50 overflow-y-auto flex items-center justify-center">
+                                <!-- Modal Content -->
+                                <div class="sm:max-w-lg sm:w-full m-3 sm:mx-auto flex flex-col bg-white dark:bg-gray-800 rounded shadow-lg transition-transform transform">
+                                    <div class="p-4">
+                                        <div class="p-9">
+                                            <a href="{{ url_for('dashboard') }}" class="flex justify-center">
+                                                <!-- Logo for Dark Mode -->
+                                                <img src="{{ url_for('static', filename='admin/assets/images/logo-light.png') }}"
+                                                     alt="logo" class="h-6 hidden dark:block">
+                                                <!-- Logo for Light Mode -->
+                                                <img src="{{ url_for('static', filename='admin/assets/images/logo-dark.png') }}"
+                                                     alt="logo" class="h-6 block dark:hidden">
+                                            </a>
+                                        </div>
+
+                                        <!-- Modal Form -->
+                                        <form class="px-6" @submit.prevent="submitForm">
+                                            <div class="space-y-1 mb-6">
+                                                <label for="categoryName" class="font-semibold text-gray-500">Category
+                                                    Name</label>
+                                                <input v-model="form.categoryName" type="text" id="categoryName"
+                                                       class="form-input">
+                                                <div v-cloak
+                                                     v-if="v$.form.categoryName.$invalid && v$.form.categoryName.$dirty"
+                                                     class="text-danger">
+                                                    [[ v$.form.categoryName.$errors[0].$message ]]
+                                                </div>
+                                            </div>
+
+                                            <div class="space-y-1 mb-6">
+                                                <label for="description"
+                                                       class="font-semibold text-gray-500">Description</label>
+                                                <textarea v-model="form.description" class="form-input" id="description"
+                                                          rows="5"></textarea>
+                                                <div v-cloak
+                                                     v-if="v$.form.description.$invalid && v$.form.description.$dirty"
+                                                     class="text-danger">
+                                                    [[ v$.form.description.$errors[0].$message ]]
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-6 text-center">
+                                                <button type="submit"
+                                                        class="border border-pink/20 btn bg-pink/20 text-pink hover:bg-pink hover:text-white">
+                                                    [[ isEditing ? 'Update Category' : 'Create Category' ]]
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </Transition>
+                        <Transition name="fade">
+                            <div v-show="isModalOpen"
+                                 class="transition-all fixed inset-0 z-40 bg-gray-900 bg-opacity-50 dark:bg-opacity-80"
+                                 data-fc-overlay-backdrop="" @click="toggleModal">
+                            </div>
+                        </Transition>
+                    </div>
+                </div>
+
+                <!-- Product Table -->
+                <div class="overflow-x-auto">
+                    <div class="min-w-full inline-block align-middle">
+                        <div class="overflow-hidden">
+                            <div class="gridjs-head">
+                                <div class="gridjs-search"><input type="search" id="keyword"
+                                                                  v-model="keyword"
+                                                                  @input="fetchCategories"
+                                                                  placeholder="Type a keyword..."
+                                                                  class="gridjs-input gridjs-search-input">
+                                </div>
+                            </div>
+
+                            <div v-show="categories.length > 0 && !loading" role="complementary"
+                                 class="gridjs gridjs-container" style="width: 100%;">
+                                <div class="gridjs-wrapper" style="height: auto;">
+                                    <table role="grid" class="gridjs-table" style="height: auto;">
+                                        <thead class="gridjs-thead">
+                                        <tr class="gridjs-tr">
+                                            <th data-column-id="id" class="gridjs-th" style="width: 120px;">
+                                                <div class="gridjs-th-content">Id</div>
+                                            </th>
+                                            <th data-column-id="name" class="gridjs-th">
+                                                <div class="gridjs-th-content">Name</div>
+                                            </th>
+                                            <th data-column-id="description" class="gridjs-th">
+                                                <div class="gridjs-th-content">Description</div>
+                                            </th>
+                                            <th data-column-id="id" class="gridjs-th text-center" style="width: 120px;">
+                                                <div class="gridjs-th-content">Action</div>
+                                            </th>
+                                        </tr>
+                                        </thead>
+                                        <tbody class="gridjs-tbody">
+                                        <!-- Loop through categories dynamically with Vue -->
+                                        <tr v-for="category in categories" :key="category.id" class="gridjs-tr">
+                                            <td data-column-id="id" class="gridjs-td">
+                                                [[ category.id ]]
+                                            </td>
+                                            <td data-column-id="name" class="gridjs-td">
+                                                [[ category.name ]]
+                                            </td>
+                                            <td data-column-id="description" class="gridjs-td">
+                                                [[ category.description ]]
+                                            </td>
+                                            <td data-column-id="action" class="gridjs-td text-center">
+                                                <button
+                                                        @click="editCategory(category)"
+                                                        class="text-lg text-primary hover:text-blue-700 focus:ring focus:ring-blue-300 rounded-md p-1"
+                                                        title="Edit">
+                                                    <i class="fas fa-edit"></i> <!-- FontAwesome Edit Icon -->
+                                                </button>
+                                                <button
+                                                        @click="deleteCategory(category.id)"
+                                                        class="text-danger text-lg hover:text-red-700 focus:ring focus:ring-red-300 rounded-md p-1 ml-2"
+                                                        title="Delete">
+                                                    <i class="fas fa-trash-alt"></i> <!-- FontAwesome Delete Icon -->
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="gridjs-footer">
+                                    <div class="gridjs-pagination">
+                                        <div role="status" aria-live="polite" class="gridjs-summary"
+                                             title="Page [[ currentPage ]] of [[ Math.ceil(totalCategories / itemsPerPage) ]]">
+                                            Showing <b>[[ ((currentPage - 1) * itemsPerPage) + 1 ]]</b> to <b>[[
+                                            currentPage * itemsPerPage ]]</b> of <b>[[ totalCategories ]]</b> results
+                                        </div>
+                                        <div class="gridjs-pages">
+                                            <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1"
+                                                    class="gridjs-previous">
+                                                Previous
+                                            </button>
+                                            <button @click="changePage(currentPage + 1)"
+                                                    :disabled="currentPage * itemsPerPage >= totalCategories"
+                                                    class="gridjs-nextPage">
+                                                Next
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-if="loading" v-cloak
+                                 class="mt-5 mb-5 flex justify-center items-center bg-white/75 dark:bg-gray-900/75 z-50">
+                                <div class="animate-spin inline-block w-8 h-8 border-[3px] border-current border-t-transparent text-pink rounded-full"
+                                     role="status" aria-label="loading">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                            </div>
+                            <div v-if="categories.length === 0 && loading ===false" v-cloak
+                                 class="mt-5 flex justify-center items-center bg-white/75 dark:bg-gray-900/75 z-50">
+                                The list is empty
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+{% endblock %}
+
+{% block customJs %}
+    <!-- Include Vue.js -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-demi"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@vuelidate/core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@vuelidate/validators"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='admin/assets/libs/gridjs/gridjs.umd.js') }}"></script>
+    {#    <script src="{{ url_for('static', filename='admin/assets/js/app.js') }}"></script>#}
+
+
+
+
+    <script>
+        const {createApp} = Vue;
+        const {useVuelidate} = Vuelidate;
+        const {required, minLength, maxLength, qty, helpers} = VuelidateValidators;
+
+        createApp({
+            delimiters: ['[[', ']]'], // Change the default delimiters
+            data() {
+                return {
+                    isModalOpen: false, // Modal starts closed
+                    message: "working",
+                    categories: [],
+                    loading: false,
+                    form: {
+                        id: null,
+                        categoryName: '',
+                        description: ''
+                    },
+                    currentPage: 1,
+                    itemsPerPage: 10,
+                    totalCategories: 0,
+                    totalPages: 0,
+                    pages: [],
+                    keyword: "",
+                    isEditing: false, // Set this to true when editing an existing category
+                    categoryId: null,
+                };
+            },
+            validations() {
+                return {
+                    form: {
+                        categoryName: {
+                            required: helpers.withMessage("Name is required", required),
+                        },
+                        description: {
+                            required: helpers.withMessage("Description is required", required),
+                        }
+                    }
+                };
+            },
+            setup() {
+                return {
+                    v$: useVuelidate(),
+                };
+            },
+            mounted() {
+                this.fetchCategories()
+            },
+            methods: {
+                fetchCategories() {
+                    this.loading = true;
+                    axios.get(`/api/get/categories`, {
+                        params: {
+                            page: this.currentPage,       // Current page for pagination
+                            limit: this.itemsPerPage,     // Number of items per page
+                            keyword: this.keyword, // Keyword for search (trimmed to remove extra spaces)
+                        }
+                    }).then(response => {
+                        this.loading = false;
+                        this.categories = response.data.categories;
+                        this.totalCategories = response.data.totalCount;
+                        this.totalPages = response.data.totalPages;
+                        this.pages = response.data.pages; // Get the page numbers (e.g., [3, 4, 5, 6, 7])
+
+                        // Update pagination buttons dynamically
+                        this.updatePagination();
+                    })
+                        .catch(error => {
+                            this.loading = false;
+                            console.error('Error fetching categories:', error);
+                        });
+                },
+
+                // Method to handle page change (click on page number or next/previous)
+                goToPage(page) {
+                    if (page > 0 && page <= this.totalPages) {
+                        this.currentPage = page;
+                        this.fetchCategories(); // Fetch categories for the selected page
+                    }
+                },
+
+                // Method to update the pagination buttons dynamically
+                updatePagination() {
+                    const paginationButtons = document.querySelector('.gridjs-pages');
+                    paginationButtons.innerHTML = '';  // Clear previous buttons
+
+                    // Create Previous button
+                    const prevButton = document.createElement('button');
+                    prevButton.textContent = 'Previous';
+                    prevButton.disabled = this.currentPage === 1;
+                    prevButton.addEventListener('click', () => this.goToPage(this.currentPage - 1));
+                    paginationButtons.appendChild(prevButton);
+
+                    // Create page number buttons (show 5 pages)
+                    this.pages.forEach(page => {
+                        const pageButton = document.createElement('button');
+                        pageButton.setAttribute('aria-label', `Page ${page}`);
+                        pageButton.textContent = page;
+                        pageButton.addEventListener('click', () => this.goToPage(page));
+
+                        // Highlight the current page
+                        if (page === this.currentPage) {
+                            pageButton.classList.add('gridjs-currentPage');
+                        }
+
+                        paginationButtons.appendChild(pageButton);
+                    });
+
+                    // Create Next button
+                    const nextButton = document.createElement('button');
+                    nextButton.textContent = 'Next';
+                    nextButton.disabled = this.currentPage === this.totalPages;
+                    nextButton.addEventListener('click', () => this.goToPage(this.currentPage + 1));
+                    paginationButtons.appendChild(nextButton);
+                },
+
+
+                submitForm() {
+                    this.v$.$touch(); // Mark all fields as touched
+                    if (this.v$.$invalid) {
+                        console.error("Validation errors present");
+                        return; // Stop submission if form is invalid
+                    }
+                    if (this.isEditing) {
+                        this.updateCategory(this.form.id); // Update the existing category
+                    } else {
+                        this.createCategory(); // Create a new category
+                    }
+                },
+                createCategory() {
+                    this.loading = true;// Assuming the backend sends users data as an array
+                    axios.post('/api/add/category', this.form, {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(response => {
+                            if (response.status >= 200 && response.status < 300) {
+                                // Handle the success case
+                                this.clearForm();
+                                this.toggleModal();
+                                this.showSuccessAlert("Success", "Category added successfully", "success"); // Call this function when you want to trigger the alert
+                                this.fetchCategories(); // Refresh categories
+                                this.loading = false; // Hide loading indicator
+                                console.log('Category added successfully:', response.data);
+                            } else {
+                                // Handle the error case (non-2xx status)
+                                this.loading = false;
+                                console.error('Error adding category:', response.data);
+                            }
+                        }
+                    )
+                        .catch(error => {
+                            this.loading = false;// Assuming the backend sends users data as an array
+                            console.error('Error adding categories:', error);
+                        });                    // Add your submission logic here
+                },
+                editCategory(category) {
+                    this.form.categoryName = category.name;  // Pre-fill the name
+                    this.form.description = category.description;  // Pre-fill the description
+                    this.form.id = category.id;  // Store the category ID for submitting the update
+                    this.isEditing = true;
+                    this.toggleModal();
+                },
+                updateCategory(id) {
+                    axios.put(`/api/update/category/${id}`, this.form, {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(response => {
+                        if (response.status >= 200 && response.status < 300) {
+                            this.clearForm();
+                            this.toggleModal();
+                            this.showSuccessAlert("Success", "Category updated successfully", "success");
+                            this.fetchCategories();
+                            console.log('Category updated successfully:', response.data);
+                        } else {
+                            console.error('Error updating category:', response.data);
+                        }
+                    })
+                },
+                deleteCategory(id) {
+                    // Show SweetAlert confirmation modal
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: 'You won\'t be able to revert this!',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Proceed with deletion if the user confirmed
+                            axios.delete(`/api/delete/category/${id}`).then(response => {
+                                if (response.status >= 200 && response.status < 300) {
+                                    // Show success message
+                                    Swal.fire(
+                                        'Deleted!',
+                                        'Your category has been deleted.',
+                                        'success'
+                                    );
+                                    this.fetchCategories();  // Refresh categories list after deletion
+                                    console.log('Category deleted successfully:', response.data);
+                                } else {
+                                    console.error('Error deleting category:', response.data);
+                                }
+                            }).catch(error => {
+                                console.error('Error deleting category:', error);
+                                Swal.fire(
+                                    'Error!',
+                                    'There was an issue deleting the category.',
+                                    'error'
+                                );
+                            });
+                        }
+                    });
+                },
+
+                clearForm() {
+                    this.form.categoryName = '';
+                    this.form.description = '';
+                    this.isEditing = false;
+                    this.v$.$reset(); // Reset form to its initial state
+                },
+
+
+                showSuccessAlert(title, text, icon) {
+                    Swal.fire({
+                        title: title,
+                        text: text,
+                        icon: icon,
+                        showCloseButton: true
+                    });
+                },
+                changePage(page) {
+                    if (page < 1 || page > Math.ceil(this.totalCategories / this.itemsPerPage)) return;
+                    this.currentPage = page;
+                    this.fetchCategories();  // Re-fetch categories for the new page
+                },
+                toggleModal() {
+                    this.isModalOpen = !this.isModalOpen; // Toggles modal open/close
+                },
+                toggleCreateModal() {
+                    this.clearForm();
+                    this.isModalOpen = !this.isModalOpen; // Toggles modal open/close
+                }
+                ,
+                beforeEnter(el) {
+                    // Set the modal off-canvas initially at the bottom (down)
+                    el.style.transform = 'translateY(100%)'; // Start from below the screen
+                    el.style.opacity = 0; // Make the modal invisible
+                }
+                ,
+                enter(el, done) {
+                    // Trigger reflow to ensure the transition happens
+                    el.offsetHeight; // This is necessary to trigger the CSS transition
+
+                    // Now, animate the modal from the bottom (translateY(100%)) to the center (translateY(0))
+                    el.style.transition = 'transform 0.5s ease-out, opacity 0.5s ease-out';
+                    el.style.transform = 'translateY(0)'; // Move the modal to the center
+                    el.style.opacity = 1; // Fade in the modal
+
+                    done(); // Transition is done
+                }
+                ,
+                leave(el, done) {
+                    // Transition the modal upwards (off-screen)
+                    el.style.transition = 'transform 0.5s ease-in, opacity 0.5s ease-in';
+                    el.style.transform = 'translateY(-100%)'; // Move the modal off the screen upwards
+                    el.style.opacity = 0; // Fade out the modal
+
+                    // Delay the removal from the DOM until the animation is complete
+                    setTimeout(() => {
+                        done(); // Call done after the transition is complete
+                    }, 500); // Match the duration of the transition (500ms)
+                }
+            }
+        }).mount('#app');
+
+    </script>
+
+    <style scoped>
+        /* Modal transition styles inside Vue component */
+        .modal-enter-active,
+        .modal-leave-active {
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+        }
+
+        .modal-enter, .modal-leave-to /* .modal-leave-active in <2.1.8 */
+        {
+            transform: translateY(100%); /* Start below the screen */
+            opacity: 0; /* Start as invisible */
+        }
+
+        .modal-leave {
+            transform: translateY(-100%); /* Move off the screen upwards */
+            opacity: 0; /* Fade out */
+        }
+    </style>
+{% endblock %}

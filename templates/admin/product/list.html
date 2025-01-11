@@ -1,0 +1,962 @@
+{% extends "admin/layout/layout.html" %}
+
+<!-- ============================================================== -->
+<!-- Start Page Content here -->
+<!-- ============================================================== -->
+{% block customCss %}
+    <link href="{{ url_for('static', filename='admin/assets/libs/gridjs/theme/mermaid.min.css') }}" rel="stylesheet"
+          type="text/css">
+    <link href="{{ url_for('static', filename='admin/assets/css/app.min.css') }}" rel="stylesheet" type="text/css">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/compressorjs@1.0.7/dist/compressor.min.js"></script>
+    <script type="module" src="{{ url_for('static', filename='admin/assets/mycustomJs/cropperModule.js') }}"></script>
+    <style>
+        .gridjs-td {
+            word-wrap: break-word; /* Break words onto new lines */
+            word-break: break-word; /* Break long words */
+        }
+
+
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    <main class="p-6" id="app" v-cloak>
+        <div class="card">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="card-title">Products List</h3>
+                    <div>
+                        <!-- Trigger button to open modal -->
+                        <button @click="toggleCreateModal" type="button"
+                                class="btn border-pink text-pink hover:bg-pink hover:text-white">
+                            Create
+                        </button>
+
+                        <Transition name="slide-up" @before-enter="beforeEnter" @enter="enter" @leave="leave">
+                            <div v-show="isModalOpen" @click.self="toggleModal" v-cloak
+                                 class="w-full h-full fixed top-0 left-0 z-50 overflow-y-auto flex items-center justify-center">
+                                <!-- Modal Content -->
+                                <div class="sm:max-w-7xl sm:w-full m-3 sm:mx-auto flex flex-col bg-white dark:bg-gray-800 rounded shadow-lg transition-transform transform">
+                                    <div class="p-4">
+                                        <div class="p-9">
+                                            <a href="{{ url_for('dashboard') }}" class="flex justify-center">
+                                                <!-- Logo for Dark Mode -->
+                                                <img src="{{ url_for('static', filename='admin/assets/images/logo-light.png') }}"
+                                                     alt="logo" class="h-6 hidden dark:block">
+                                                <!-- Logo for Light Mode -->
+                                                <img src="{{ url_for('static', filename='admin/assets/images/logo-dark.png') }}"
+                                                     alt="logo" class="h-6 block dark:hidden">
+                                            </a>
+                                        </div>
+
+                                        <!-- Modal Form -->
+                                        <form @submit.prevent="submitForm" class="flex space-x-8 items-start p-6">
+                                            <div class="w-1/4">
+                                                <!-- Image Holder (Card) -->
+                                                <div class="card border dark:border-gray-700 shadow-md mt-6 mx-5">
+                                                    <!-- Product Image -->
+                                                    <img
+                                                            v-if="CroppedImageURL"
+                                                            :src="CroppedImageURL"
+                                                            class="w-full h-full object-cover rounded-t"
+                                                            alt="Product Image"
+                                                    />
+                                                    <img
+                                                            v-else-if="form.image"
+                                                            :src="'/static/upload/product/crop/' + form.image"
+                                                            alt="Product Image"
+                                                            class="w-full h-full object-cover rounded-t"
+                                                    />
+                                                    <img
+                                                            v-else
+                                                            class="w-full h-full object-cover rounded-t"
+                                                            alt="Product Image"
+                                                            src="https://via.placeholder.com/300x400?text=No+Product+Image"
+                                                    />
+
+                                                    <div class="p-4">
+                                                        <!-- File Input -->
+                                                        <input
+                                                                type="file"
+                                                                id="productImage"
+                                                                ref="productImageInput"
+                                                                class="form-input text-sm w-full"
+                                                                accept="image/*"
+                                                                @change="handleImageUpload"
+                                                        />
+                                                        <div v-if="formErrors" class="text-danger text-xs mt-1">
+                                                            {{ formErrors }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex-1 space-y-6 mt-5">
+                                                <!-- First Row: Product Name and Code -->
+                                                <div class="flex space-x-3">
+                                                    <!-- Name -->
+                                                    <div class="w-1/2">
+                                                        <label for="name" class="font-semibold text-gray-500">Product
+                                                            Name</label>
+                                                        <input v-model="form.name" type="text" id="name"
+                                                               class="form-input w-full mt-1">
+                                                        <div v-cloak
+                                                             v-if="v$.form.name?.$invalid && v$.form.name?.$dirty"
+                                                             class="text-danger text-xs mt-1">
+                                                            [[ v$.form.name?.$errors[0]?.$message ]]
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Product Code -->
+                                                    <div class="w-1/2">
+                                                        <label for="code" class="font-semibold text-gray-500">Product
+                                                            Code</label>
+                                                        <input v-model="form.code" type="text" id="code"
+                                                               class="form-input w-full mt-1">
+                                                        <div v-cloak
+                                                             v-if="v$.form.code?.$invalid && v$.form.code?.$dirty"
+                                                             class="text-danger text-xs mt-1">
+                                                            [[ v$.form.code?.$errors[0]?.$message ]]
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="flex space-x-3">
+                                                    <!-- Category -->
+                                                    <div class="w-1/2">
+                                                        <label for="category" class="font-semibold text-gray-500">Category</label>
+                                                        <select v-model="form.category" id="category"
+                                                                class="form-input w-full mt-1">
+                                                            <option value="" disabled>Select a category</option>
+                                                            <option v-for="category in categories" :key="category.id"
+                                                                    :value="category.id">
+                                                                [[ category.name ]]
+                                                            </option>
+                                                        </select>
+                                                        <div v-cloak
+                                                             v-if="v$.form.category?.$invalid && v$.form.category?.$dirty"
+                                                             class="text-danger text-xs mt-1">
+                                                            [[ v$.form.category?.$errors[0]?.$message ]]
+                                                        </div>
+                                                    </div>
+                                                    <!-- QTy -->
+                                                    <div class="w-1/2">
+                                                        <label for="current_stock"
+                                                               class="font-semibold text-gray-500">Qty</label>
+                                                        <input v-model="form.current_stock" type="number" step="0.01"
+                                                               id="current_stock"
+                                                               class="form-input w-full mt-1">
+                                                        <div v-cloak
+                                                             v-if="v$.form.current_stock?.$invalid && v$.form.current_stock?.$dirty"
+                                                             class="text-danger text-xs mt-1">
+                                                            [[ v$.form.current_stock?.$errors[0]?.$message ]]
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+
+                                                <!-- Second Row: Price and Cost -->
+                                                <div class="flex space-x-3">
+                                                    <!-- Price -->
+                                                    <div class="w-1/2">
+                                                        <label for="price"
+                                                               class="font-semibold text-gray-500">Price</label>
+                                                        <input v-model="form.price" type="number" step="0.01" id="price"
+                                                               class="form-input w-full mt-1">
+                                                        <div v-cloak
+                                                             v-if="v$.form.price?.$invalid && v$.form.price?.$dirty"
+                                                             class="text-danger text-xs mt-1">
+                                                            [[ v$.form.price?.$errors[0]?.$message ]]
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Cost -->
+                                                    <div class="w-1/2">
+                                                        <label for="cost"
+                                                               class="font-semibold text-gray-500">Cost</label>
+                                                        <input v-model="form.cost" type="number" step="0.01" id="cost"
+                                                               class="form-input w-full mt-1">
+                                                        <div v-cloak
+                                                             v-if="v$.form.cost?.$invalid && v$.form.cost?.$dirty"
+                                                             class="text-danger text-xs mt-1">
+                                                            [[ v$.form.cost?.$errors[0]?.$message ]]
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Submit Button -->
+                                                <div class="text-end">
+                                                    <button type="submit"
+                                                            class="border border-pink/20 btn bg-pink/20 text-pink hover:bg-pink hover:text-white px-6 py-2 rounded-md">
+                                                        [[ isEditing ? 'Update Product' : 'Create Product' ]]
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </Transition>
+
+                        <Transition name="fade">
+                            <div v-show="isModalOpen"
+                                 class="transition-all fixed inset-0 z-40 bg-gray-900 bg-opacity-50 dark:bg-opacity-80"
+                                 data-fc-overlay-backdrop="" @click="toggleModal">
+                            </div>
+                        </Transition>
+                    </div>
+                </div>
+
+                <!-- Product Table -->
+                <div class="overflow-x-auto">
+                    <div class="min-w-full inline-block align-middle">
+                        <div class="overflow-hidden">
+                            <div class="gridjs-head">
+                                <div class="gridjs-search">
+                                    <input type="search" id="keyword" v-model="keyword" @input="fetchProducts"
+                                           placeholder="Type a keyword..." class="gridjs-input gridjs-search-input">
+                                </div>
+                            </div>
+
+                            <div v-show="products.length > 0 && !loading" role="complementary"
+                                 class="gridjs gridjs-container" style="width: 100%;">
+                                <div class="gridjs-wrapper" style="height: auto;">
+                                    <table role="grid" class="gridjs-table" style="height: auto;">
+                                        <thead class="gridjs-thead">
+                                        <tr class="gridjs-tr">
+                                            <th data-column-id="id" class="gridjs-th text-center"
+                                                style="min-width: 60px; max-width: 100px;width: 80px;">
+                                                <div class="gridjs-th-content">Id</div>
+                                            </th>
+                                            <th data-column-id="image" class="gridjs-th text-center"
+                                                style="min-width: 60px;width: 120px;">
+                                                <div class="gridjs-th-content">Image</div>
+                                            </th>
+                                            <th data-column-id="name" class="gridjs-th">
+                                                <div class="gridjs-th-content">Name</div>
+                                            </th>
+                                            <th data-column-id="category" class="gridjs-th">
+                                                <div class="gridjs-th-content">Category</div>
+                                            </th>
+                                            <th data-column-id="price" class="gridjs-th">
+                                                <div class="gridjs-th-content">Price</div>
+                                            </th>
+                                            <th data-column-id="stock" class="gridjs-th">
+                                                <div class="gridjs-th-content">Stock</div>
+                                            </th>
+                                            <th data-column-id="cost" class="gridjs-th text-center">
+                                                <div class="gridjs-th-content">Cost</div>
+                                            </th>
+                                            <th data-column-id="action" class="gridjs-th text-center"
+                                                style="width: 100px;">
+                                                <div class="gridjs-th-content">Action</div>
+                                            </th>
+                                        </tr>
+                                        </thead>
+                                        <tbody class="gridjs-tbody">
+                                        <!-- Loop through products dynamically with Vue -->
+                                        <tr v-for="product in products" :key="product.id" class="gridjs-tr">
+                                            <td data-column-id="id" class="gridjs-td text-center">
+                                                [[ product.id ]]
+                                            </td>
+                                            {#                                            <td data-column-id="image" class="gridjs-td text-center">#}
+                                            {#                                                <div class="relative inline-block text-center">#}
+                                            {#                                                    <!-- Product Image -->#}
+                                            {#                                                    <img v-if="product.image"#}
+                                            {#                                                         :src="'/static/upload/products/' + product.image"#}
+                                            {#                                                         alt="Product Image"#}
+                                            {#                                                         class="rounded bg-gray-100 dark:bg-gray-700 dark:border-gray-600 border p-1 h-20 w-20">#}
+                                            {#                                                    <img v-else#}
+                                            {#                                                         src="https://via.placeholder.com/300x400?text=No+Image"#}
+                                            {#                                                         alt="Product Image"#}
+                                            {#                                                         class="rounded bg-gray-100 dark:bg-gray-700 dark:border-gray-600 border p-1 h-20 w-20">#}
+                                            {#                                                </div>#}
+                                            {#                                            </td>#}
+                                            <td data-column-id="image" class="gridjs-td text-center">
+                                                <div class="relative inline-block text-center">
+                                                    <!-- Profile Image -->
+                                                    <img v-if="product.image"
+                                                         @mouseover="showTooltip(product.id)"
+                                                         @mouseleave="hideTooltip"
+                                                         :src="'/static/upload/product/crop/' + product.image"
+                                                         alt="Profile Image"
+                                                         class="rounded bg-gray-100 dark:bg-gray-700 dark:border-gray-600 border p-1 h-20 w-20">
+                                                    <img v-else
+                                                         src="https://via.placeholder.com/300x400?text=No+Profile"
+                                                         alt="Profile Image"
+                                                         class="rounded bg-gray-100 dark:bg-gray-700 dark:border-gray-600 border p-1 h-20 w-20">
+
+                                                    <!-- Tooltip -->
+                                                    <transition name="fade"
+                                                                enter-active-class="transition-all duration-300 ease-in-out"
+                                                                enter-class="opacity-0"
+                                                                enter-to-class="opacity-100 scale-100"
+                                                                leave-active-class="transition duration-300 ease-in"
+                                                                leave-class="opacity-100 scale-105"
+                                                                leave-to-class="opacity-0 scale-95">
+                                                        <div v-show="tooltipVisible === product.id"
+                                                             class="absolute top-0 bottom-0 right-0 transform translate-x-full bg-black rounded-lg z-50 shadow-lg flex items-center"
+                                                             :class="{ 'transition-all opacity-100 translate-x-1/2 duration-300': tooltipVisible === product.id }">
+                                                            <div class="w-32">
+                                                                <img
+                                                                        :src="'/static/upload/product/original/' + product.image"
+                                                                        alt="Profile Image"
+                                                                        class="rounded bg-gray-100 dark:bg-gray-700 dark:border-gray-600 border p-2 object-cover"
+                                                                >
+                                                            </div>
+
+                                                            <!-- Tooltip Arrow -->
+                                                            <div class="bg-gray-100 dark:bg-gray-700 w-2.5 h-2.5 rotate-45 absolute left-0 top-1/2 -translate-x-1/2"></div>
+                                                        </div>
+                                                    </transition>
+                                                </div>
+                                            </td>
+
+
+                                            <td data-column-id="name" class="gridjs-td">
+                                                [[ product.name ]]
+                                            </td>
+                                            <td data-column-id="category" class="gridjs-td">
+                                                [[ product.category ? product.category.name : 'No Category' ]]
+                                            </td>
+                                            <td data-column-id="price" class="gridjs-td">
+                                                $[[ product.price ]]
+                                            </td>
+                                            <td data-column-id="cost" class="gridjs-td">
+                                                $[[ product.cost ]]
+                                            </td>
+                                            <td data-column-id="stock" class="gridjs-td">
+                                                [[ product.current_stock ]] QTY
+                                            </td>
+                                            <td data-column-id="action" class="gridjs-td text-center">
+                                                <button @click="editProduct(product)"
+                                                        class="text-lg text-primary hover:text-blue-700 focus:ring focus:ring-blue-300 rounded-md p-1"
+                                                        title="Edit">
+                                                    <i class="fas fa-edit"></i> <!-- FontAwesome Edit Icon -->
+                                                </button>
+                                                <button @click="deleteProduct(product.id)"
+                                                        class="text-danger text-lg hover:text-red-700 focus:ring focus:ring-red-300 rounded-md p-1 ml-2"
+                                                        title="Delete">
+                                                    <i class="fas fa-trash-alt"></i> <!-- FontAwesome Delete Icon -->
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="gridjs-footer">
+                                    <div class="gridjs-pagination">
+                                        <div role="status" aria-live="polite" class="gridjs-summary"
+                                             title="Page [[ currentPage ]] of [[ Math.ceil(totalProducts / itemsPerPage) ]]">
+                                            Showing <b>[[ ((currentPage - 1) * itemsPerPage) + 1 ]]</b> to <b>[[
+                                            currentPage * itemsPerPage ]]</b> of <b>[[ totalProducts ]]</b> results
+                                        </div>
+                                        <div class="gridjs-pages">
+                                            <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1"
+                                                    class="gridjs-previous">
+                                                Previous
+                                            </button>
+                                            <button @click="changePage(currentPage + 1)"
+                                                    :disabled="currentPage * itemsPerPage >= totalProducts"
+                                                    class="gridjs-nextPage">
+                                                Next
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div v-if="loading" v-cloak
+                                 class="mt-5 mb-5 flex justify-center items-center bg-white/75 dark:bg-gray-900/75 z-50">
+                                <div class="animate-spin inline-block w-8 h-8 border-[3px] border-current border-t-transparent text-pink rounded-full"
+                                     role="status" aria-label="loading">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                            </div>
+                            <div v-if="products.length === 0 && loading === false" v-cloak
+                                 class="mt-5 flex justify-center items-center bg-white/75 dark:bg-gray-900/75 z-50">
+                                The list is empty
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Crop Modal -->
+        <div
+                v-show="isCropModal" @click.self="triggerError" v-cloak
+                class="w-full h-full fixed top-0 left-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center"
+        >
+            <audio id="crop-sound" src="{{ url_for('static', filename='admin/assets/audio/error.mp3') }}"
+                   preload="auto"></audio>
+
+            <div
+                    :class="[
+                        'w-full max-w-lg bg-dark text-white shadow-lg',
+                        isCropModal ? 'transform transition-all scale-100 opacity-100' : 'transform transition-all scale-90 opacity-0', // Smooth scale and fade-in/out
+                        showError ? 'transform scale-105 opacity-100 transition-all duration-300 ease-in-out' : ''
+        ]"
+            >
+                <!-- Modal Header -->
+                <div class="flex justify-center items-center py-3 px-5 bg-pink/20 dark:border-gray-700">
+                    <h3 class="text-lg font-medium">
+                        Crop Image
+                    </h3>
+                </div>
+
+                <!-- Modal Body (Image Cropper) -->
+                <div class="p-4 bg-dark text-white">
+                    <div class="relative">
+                        <img ref="cropperImage" :src="imageUrl" alt="Image to Crop" class="w-full rounded-md"/>
+                    </div>
+                </div>
+
+                <!-- Modal Footer (Actions) -->
+                <div class="flex justify-end items-center gap-2 p-4 border-t bg-dark border-white/5">
+                    <button @click="cancelCrop" type="button"
+                            class="btn border-danger text-danger hover:bg-danger hover:text-white">
+                        Cancel
+                    </button>
+                    <button @click="cropImage" type="button"
+                            class="btn border-pink text-pink hover:bg-pink hover:text-white">
+                        Crop
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+    </main>
+
+{% endblock %}
+
+{% block customJs %}
+    <!-- Include Vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-demi"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@vuelidate/core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@vuelidate/validators"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='admin/assets/libs/gridjs/gridjs.umd.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js">
+    </script>
+    <script>
+        $.LoadingOverlaySetup({
+            background: "rgba(255, 255, 255, 0.8)", // Set the background color with transparency
+            image: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><circle r="80" cx="500" cy="90"/><circle r="80" cx="500" cy="910"/><circle r="80" cx="90" cy="500"/><circle r="80" cx="910" cy="500"/><circle r="80" cx="212" cy="212"/><circle r="80" cx="788" cy="212"/><circle r="80" cx="212" cy="788"/><circle r="80" cx="788" cy="788"/></svg>', // Custom SVG image
+            imageAnimation: "2000ms", // Image animation duration
+            imageColor: "#202020", // Image color
+            imageAutoResize: true, // Resize image automatically
+            imageResizeFactor: 0.3, // Resize factor for the image
+            imageOrder: 1, // Image order
+            fontawesome: false, // Disable FontAwesome icons
+            text: "", // No text
+            textColor: "#202020", // Text color (if you add text)
+            textAutoResize: true, // Resize text automatically
+            textResizeFactor: 0.5, // Text resize factor
+            progress: false, // No progress bar
+            progressAutoResize: true, // Resize progress bar automatically
+            progressResizeFactor: 0.25, // Resize factor for the progress bar
+            progressColor: "#a0a0a0", // Progress bar color
+            progressOrder: 5, // Progress bar order
+            progressFixedPosition: false, // Disable fixed position for the progress bar
+            progressSpeed: 200, // Progress bar speed
+            size: 50, // Initial size of the overlay
+            maxSize: 120, // Max size of the overlay
+            minSize: 20, // Min size of the overlay
+            direction: "column", // Layout direction for items in the overlay
+            fade: 400, // Fade duration
+            resizeInterval: 50, // Resize interval
+            hideAfter: 5000 // Hide overlay after 5 seconds
+        });
+    </script>
+
+    {#    <script src="{{ url_for('static', filename='admin/assets/js/app.js') }}"></script>#}
+
+
+    <script type="module">
+        const {createApp, ref} = Vue
+        const {useVuelidate} = Vuelidate;
+        const {required, minLength, maxLength, qty, helpers, email} = VuelidateValidators;
+        import {
+            initializeCropper,
+            compressFile
+        } from "{{ url_for('static', filename='admin/assets/mycustomJs/cropperModule.js') }}";
+
+        createApp({
+            delimiters: ['[[', ']]'], // Change the default delimiters
+            data() {
+                return {
+                    isModalOpen: false,
+                    message: "working",
+                    products: [],
+                    loading: false,
+                    imageUrl: null,
+                    croppedImage: null,
+                    isCropModal: false,
+                    showError: false,
+                    cropperInstance: null,
+                    originalImage: null,
+                    formErrors: "",
+                    form: {
+                        id: null,
+                        name: '',
+                        code: '',
+                        current_stock: 0,
+                        price: 0,
+                        category: '', // Holds the selected category ID
+                        cost: 0,
+                        image: null, // To store the selected product image
+                    },
+                    categories: [], // Stores all fetched categories
+                    currentPage: 1,
+                    itemsPerPage: 10,
+                    totalProducts: 0,
+                    totalPages: 0,
+                    pages: [],
+                    keyword: "",
+                    isEditing: false,
+                    CroppedImageURL: '', // Define the property
+                    tooltipVisible: false, // Controls visibility of the tooltip
+                    tooltipPosition: {
+                        left: 0,  // X Position of the tooltip
+                        top: 0    // Y Position of the tooltip
+                    }
+                };
+            },
+            validations() {
+                return {
+                    form: {
+                        name: {
+                            required: helpers.withMessage("Product name is required", required),
+                            minLength: helpers.withMessage("Product name must be at least 3 characters", minLength(3)),
+                        },
+                        code: {
+                            required: helpers.withMessage("Product code is required", required),
+                        },
+                        price: {
+                            required: helpers.withMessage("Price is required", required),
+                            min: helpers.withMessage("Price must be a positive number", minLength(0)),
+                        },
+                        category: {
+                            required: helpers.withMessage("Category is required", required),
+                        },
+                        cost: {
+                            required: helpers.withMessage("Cost is required", required),
+                        },
+                        current_stock: {
+                            required: helpers.withMessage("Qty is required", required),
+                        },
+                    }
+                };
+            },
+            setup() {
+                return {
+                    v$: useVuelidate(),
+                };
+            },
+            mounted() {
+                this.fetchProducts();
+                this.fetchCategories();
+
+            },
+            methods: {
+                fetchCategories() {
+                    axios.get('/api/get/categories') // Adjust API URL as needed
+                        .then(response => {
+                            this.categories = response.data.categories; // Populate categories
+                            console.log(response.data.categories)
+
+                        })
+                        .catch(error => {
+                            console.error('Error fetching categories:', error);
+                        });
+                },
+                fetchProducts() {
+                    this.loading = true;
+                    axios.get(`/api/get/products`, {
+                        params: {
+                            page: this.currentPage,       // Current page for pagination
+                            limit: this.itemsPerPage,     // Number of items per page
+                            keyword: this.keyword, // Keyword for search (trimmed to remove extra spaces)
+                        }
+                    }).then(response => {
+                        this.loading = false;
+                        this.products = response.data.products;
+                        this.totalProducts = response.data.totalCount;
+                        this.totalPages = response.data.totalPages;
+                        this.pages = response.data.pages; // Get the page numbers (e.g., [3, 4, 5, 6, 7])
+
+                        // Update pagination buttons dynamically
+                        this.updatePagination();
+                    })
+                        .catch(error => {
+                            this.loading = false;
+                            console.error('Error fetching products:', error);
+                        });
+                },
+                // Method to handle page change (click on page number or next/previous)
+                goToPage(page) {
+                    if (page > 0 && page <= this.totalPages) {
+                        this.currentPage = page;
+                        this.fetchProducts(); // Fetch products for the selected page
+                    }
+                },
+
+                // Method to update the pagination buttons dynamically
+                updatePagination() {
+                    const paginationButtons = document.querySelector('.gridjs-pages');
+                    paginationButtons.innerHTML = '';  // Clear previous buttons
+
+                    // Create Previous button
+                    const prevButton = document.createElement('button');
+                    prevButton.textContent = 'Previous';
+                    prevButton.disabled = this.currentPage === 1;
+                    prevButton.addEventListener('click', () => this.goToPage(this.currentPage - 1));
+                    paginationButtons.appendChild(prevButton);
+
+                    // Create page number buttons (show 5 pages)
+                    this.pages.forEach(page => {
+                        const pageButton = document.createElement('button');
+                        pageButton.setAttribute('aria-label', `Page ${page}`);
+                        pageButton.textContent = page;
+                        pageButton.addEventListener('click', () => this.goToPage(page));
+
+                        // Highlight the current page
+                        if (page === this.currentPage) {
+                            pageButton.classList.add('gridjs-currentPage');
+                        }
+
+                        paginationButtons.appendChild(pageButton);
+                    });
+
+                    // Create Next button
+                    const nextButton = document.createElement('button');
+                    nextButton.textContent = 'Next';
+                    nextButton.disabled = this.currentPage === this.totalPages;
+                    nextButton.addEventListener('click', () => this.goToPage(this.currentPage + 1));
+                    paginationButtons.appendChild(nextButton);
+                },
+
+                handleImageUpload(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        this.imageUrl = URL.createObjectURL(file); // Display the selected image in the crop modal
+                        this.isCropModal = true; // Open the crop modal
+                        this.$nextTick(() => {
+                            // Initialize Cropper.js
+                            if (this.cropperInstance) {
+                                this.cropperInstance.destroy();
+                            }
+                            const imageElement = this.$refs.cropperImage;
+                            this.originalFile = file;
+                            this.cropperInstance = new initializeCropper(imageElement, NaN);
+                        });
+                    } else {
+                        this.formErrors = "No file selected.";
+                    }
+                },
+                blobUrlToFile(blobUrl, filename) {
+                    return fetch(blobUrl)
+                        .then(response => response.blob())
+                        .then(blob => {
+                            const file = new File([blob], filename, {type: blob.type});
+                            return file;
+                        })
+                        .catch(error => {
+                            console.error("Error converting blob URL to file:", error);
+                            return null; // Handle the error if necessary
+                        });
+                },
+
+                // Crop image and send it to the server
+                async cropImage() {
+                    console.log('Crop button clicked');
+                    if (this.cropperInstance) {
+                        // Get the compressed cropped data URL from the cropper
+                        this.croppedImage = await this.cropperInstance.getCompressedCroppedDataURL();
+                        this.CroppedImageURL = this.croppedImage; // Save the cropped image URL
+
+                        // Convert the blob URL to a file
+                        const croppedFile = await this.blobUrlToFile(this.CroppedImageURL, "cropped-image.jpeg");
+
+                        if (!croppedFile) {
+                            console.error("Failed to convert blob URL to file");
+                            return;
+                        }
+
+                        // Prepare the FormData and append the cropped file
+                        const formData = new FormData();
+                        formData.append('cropped_image', croppedFile); // Append cropped image
+
+                        try {
+                            const compressedFile = await compressFile(this.originalFile, 0.7);
+                            console.log('Original File:', this.originalFile);
+                            console.log('Compressed File:', compressedFile);
+                            this.originalFile = compressedFile;
+                            formData.append('original_image', this.originalFile); // Append compressed original image
+                        } catch (compressionError) {
+                            console.error('Compression failed:', compressionError);
+                            return; // Stop further processing if compression fails
+                        }
+
+                        axios.post('/admin/api/upload-temp-image/create', formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                            },
+                        })
+                            .then(response => {
+                                console.log('Image ID:', response.data.image_id); // Handle the response
+                                this.form.image = response.data.image_id;
+                            })
+                            .catch(error => {
+                                console.error('Error uploading image:', error); // Handle errors
+                            });
+
+                        {#console.log(this.form.image);#}
+                        this.isCropModal = false;
+
+                        this.cropperInstance.destroy();
+                        this.cropperInstance = null;
+                    }
+                },
+
+                // Cancel Cropping
+                cancelCrop() {
+                    this.isCropModal = false; // Close the modal
+                    if (this.cropperInstance) {
+                        this.cropperInstance.destroy(); // Destroy Cropper instance
+                        this.cropperInstance = null;
+                    }
+                },
+
+                triggerError() {
+                    const audio = document.getElementById('crop-sound');
+                    audio.play();
+
+                    this.showError = true;
+
+                    setTimeout(() => {
+                        this.showError = false;
+                    }, 300);  // Pop animation duration
+                },
+
+                submitForm() {
+                    this.v$.$touch(); // Mark all fields as touched
+                    if (this.v$.$invalid) {
+                        console.error("Validation errors present");
+                        return; // Stop submission if form is invalid
+                    }
+                    if (this.isEditing) {
+                        this.updateProduct(this.form.id);
+                    } else {
+                        this.createProduct();
+                    }
+                },
+
+                async blobToBase64(blobURL) {
+                    const response = await fetch(blobURL);
+                    const blob = await response.blob();
+                    return new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob); // This will return a Base64 string
+                    });
+                },
+
+                createProduct() {
+                    this.loading = true;
+                    axios.post('/api/add/product', this.form, {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(response => {
+                            if (response.status >= 200 && response.status < 300) {
+                                this.clearForm();
+                                this.showSuccessAlert("Success", "Product added successfully", "success");
+                                this.fetchProducts(); // Refresh products
+                                this.loading = false; // Hide loading indicator
+                                this.toggleModal();
+                                console.log('Product added successfully:', response.data);
+                            } else {
+                                this.loading = false;
+                                console.error('Error adding product:', response.data);
+                            }
+                        }
+                    )
+                        .catch(error => {
+                            this.loading = false;
+                            console.error('Error:', error);
+                            this.showError = true;
+                        });
+                },
+
+                updateProduct(productId) {
+                    this.loading = true;
+                    axios.put(`/api/update/product/${productId}`, this.form)
+                        .then(response => {
+                            this.fetchProducts();
+                            this.clearForm();
+                            this.toggleModal();
+                            this.loading = false;
+                            this.showSuccessAlert("Success", "Product updated successfully", "success");
+                        })
+                        .catch(error => {
+                            this.loading = false;
+                            console.error("Error updating product:", error);
+                            this.showError = true;
+                        });
+                },
+
+                deleteProduct(productId) {
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: 'You won\'t be able to revert this!',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            axios.delete(`/api/delete/product/${productId}`)
+                                .then(response => {
+                                    this.fetchProducts(); // Refresh products
+                                    this.showSuccessAlert("Success", "Product deleted successfully", "success");
+                                })
+                                .catch(error => {
+                                    console.error("Error deleting product:", error);
+                                });
+                        } else {
+                            // Optionally handle cancellation
+                            console.log("Product deletion cancelled");
+                        }
+                    });
+                },
+                editProduct(product) {
+                    this.form.id = product.id;  // Store the product ID for submitting the update
+                    this.form.name = product.name;  // Pre-fill the product name
+                    this.form.code = product.code;  // Pre-fill the product code
+                    this.form.image = product.image;  // Pre-fill the product image URL or path
+                    this.form.category = product.category_id;  // Pre-fill the associated category
+                    this.form.cost = product.cost;  // Pre-fill the product cost
+                    this.form.price = product.price;  // Pre-fill the product price
+                    this.form.current_stock = product.current_stock;  // Pre-fill the current stock level
+                    this.isEditing = true;
+                    this.toggleModal();
+
+                },
+
+                clearForm() {
+                    this.form = {
+                        id: null,
+                        name: '',
+                        code: '',
+                        current_stock: 0,
+                        price: 0,
+                        category: '', // Holds the selected category ID
+                        cost: 0,
+                        image: null, // To store the selected product image
+                    };
+                    this.imageUrl = null;
+                    this.croppedImage = null;
+                    this.isCropModal = false;
+                    this.showError = false;
+                    this.cropperInstance = null;
+                    this.CroppedImageURL = null;
+                    this.$refs.productImageInput.value = ''; // Reset the input value
+
+
+                    this.isEditing = false;
+                    this.v$.$reset(); // Reset all validation states to initial
+                },
+                showTooltip(userId) {
+                    this.tooltipVisible = userId;
+                },
+                // Hide the tooltip
+                hideTooltip() {
+                    this.tooltipVisible = null;
+                },
+                showSuccessAlert(title, text, icon) {
+                    Swal.fire({
+                        title: title,
+                        text: text,
+                        icon: icon,
+                        showCloseButton: true
+                    });
+                },
+
+                changePage(page) {
+                    if (page < 1 || page > Math.ceil(this.totalUsers / this.itemsPerPage)) return;
+                    this.currentPage = page;
+                    this.fetchUser();  // Re-fetch users for the new page
+                },
+
+                toggleCreateModal() {
+                    this.clearForm();
+                    this.isModalOpen = !this.isModalOpen; // Toggles modal open/close
+                },
+
+                toggleModal() {
+                    this.isModalOpen = !this.isModalOpen; // Toggles modal open/close
+                },
+
+                beforeEnter(el) {
+                    // Set the modal off-canvas initially at the bottom (down)
+                    el.style.transform = 'translateY(100%)'; // Start from below the screen
+                    el.style.opacity = 0; // Make the modal invisible
+                }
+                ,
+                enter(el, done) {
+                    // Trigger reflow to ensure the transition happens
+                    el.offsetHeight; // This is necessary to trigger the CSS transition
+
+                    // Now, animate the modal from the bottom (translateY(100%)) to the center (translateY(0))
+                    el.style.transition = 'transform 0.5s ease-out, opacity 0.5s ease-out';
+                    el.style.transform = 'translateY(0)'; // Move the modal to the center
+                    el.style.opacity = 1; // Fade in the modal
+
+                    done(); // Transition is done
+                }
+                ,
+                leave(el, done) {
+                    // Transition the modal upwards (off-screen)
+                    el.style.transition = 'transform 0.5s ease-in, opacity 0.5s ease-in';
+                    el.style.transform = 'translateY(-100%)'; // Move the modal off the screen upwards
+                    el.style.opacity = 0; // Fade out the modal
+
+                    // Delay the removal from the DOM until the animation is complete
+                    setTimeout(() => {
+                        done(); // Call done after the transition is complete
+                    }, 500); // Match the duration of the transition (500ms)
+                }
+            }
+        }).mount('#app');
+
+    </script>
+
+    <style scoped>
+        /* Modal transition styles inside Vue component */
+        .modal-enter-active,
+        .modal-leave-active {
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+        }
+
+        .modal-enter, .modal-leave-to /* .modal-leave-active in <2.1.8 */
+        {
+            transform: translateY(100%); /* Start below the screen */
+            opacity: 0; /* Start as invisible */
+        }
+
+        .modal-leave {
+            transform: translateY(-100%); /* Move off the screen upwards */
+            opacity: 0; /* Fade out */
+        }
+    </style>
+{% endblock %}

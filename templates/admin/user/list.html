@@ -1,0 +1,1001 @@
+{% extends "admin/layout/layout.html" %}
+
+<!-- ============================================================== -->
+<!-- Start Page Content here -->
+<!-- ============================================================== -->
+{% block customCss %}
+    <link href="{{ url_for('static', filename='admin/assets/libs/gridjs/theme/mermaid.min.css') }}" rel="stylesheet"
+          type="text/css">
+    <link href="{{ url_for('static', filename='admin/assets/css/app.min.css') }}" rel="stylesheet" type="text/css">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/compressorjs@1.0.7/dist/compressor.min.js"></script>
+    <script type="module" src="{{ url_for('static', filename='admin/assets/mycustomJs/cropperModule.js') }}"></script>
+    <style>
+        .gridjs-td {
+            word-wrap: break-word; /* Break words onto new lines */
+            word-break: break-word; /* Break long words */
+        }
+
+
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    <main class="p-6" id="app" v-cloak>
+        <div class="card">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="card-title">Users List</h3>
+                    <div>
+                        <!-- Trigger button to open modal -->
+                        <button @click="toggleCreateModal" type="button"
+                                class="btn border-pink text-pink hover:bg-pink hover:text-white">
+                            Create
+                        </button>
+
+                        <Transition name="slide-up" @before-enter="beforeEnter" @enter="enter" @leave="leave">
+                            <div v-show="isModalOpen" @click.self="toggleModal" v-cloak
+                                 class="w-full h-full fixed top-0 left-0 z-50 overflow-y-auto flex items-center justify-center">
+                                <!-- Modal Content -->
+                                <div class="sm:max-w-7xl sm:w-full m-3 sm:mx-auto flex flex-col bg-white dark:bg-gray-800 rounded shadow-lg transition-transform transform">
+                                    <div class="p-4">
+                                        <div class="p-9">
+                                            <a href="{{ url_for('dashboard') }}" class="flex justify-center">
+                                                <!-- Logo for Dark Mode -->
+                                                <img src="{{ url_for('static', filename='admin/assets/images/logo-light.png') }}"
+                                                     alt="logo" class="h-6 hidden dark:block">
+                                                <!-- Logo for Light Mode -->
+                                                <img src="{{ url_for('static', filename='admin/assets/images/logo-dark.png') }}"
+                                                     alt="logo" class="h-6 block dark:hidden">
+                                            </a>
+                                        </div>
+
+                                        <!-- Modal Form -->
+                                        <form @submit.prevent="submitForm" class="flex space-x-8 items-start p-6">
+                                            <div class="w-1/4">
+                                                <!-- Image Holder (Card) -->
+                                                <div class="card border dark:border-gray-700 shadow-md mt-6 mx-5">
+                                                    <!-- Profile Image -->
+                                                    <img
+                                                            v-if="CroppedImageURL"
+                                                            :src="CroppedImageURL"
+                                                            class="w-full h-full object-cover rounded-t"
+                                                            alt="Profile Image"
+                                                    />
+                                                    <img
+                                                            v-else-if="form.profile"
+                                                            :src="'/static/upload/profile/crop/' + form.profile"
+                                                            alt="Profile Image"
+                                                            class="w-full h-full object-cover rounded-t"
+                                                    />
+                                                    <img
+                                                            v-else
+                                                            class="w-full h-full object-cover rounded-t"
+                                                            alt="Profile Image"
+                                                            src="https://via.placeholder.com/300x400?text=No+Profile"
+                                                    />
+
+                                                    <div class="p-4">
+                                                        <!-- File Input -->
+                                                        <input
+                                                                type="file"
+                                                                id="profile"
+                                                                ref="profileInput"
+                                                                class="form-input text-sm w-full"
+                                                                accept="image/*"
+                                                                @change="handleImageUpload"
+                                                        />
+                                                        <div
+                                                                v-if="formErrors"
+                                                                class="text-danger text-xs mt-1"
+                                                        >
+                                                            {{ formErrors }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="flex-1 space-y-6 mt-5">
+                                                <!-- First Row: Name and Email -->
+                                                <div class="flex space-x-3">
+                                                    <!-- Name -->
+                                                    <div class="w-1/2">
+                                                        <label for="name"
+                                                               class="font-semibold text-gray-500">Name</label>
+                                                        <input v-model="form.name" type="text" id="name"
+                                                               class="form-input w-full mt-1">
+                                                        <div v-cloak
+                                                             v-if="v$.form.name?.$invalid && v$.form.name?.$dirty"
+                                                             class="text-danger text-xs mt-1">
+                                                            [[ v$.form.name?.$errors[0]?.$message ]]
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Email -->
+                                                    <div class="w-1/2">
+                                                        <label for="email"
+                                                               class="font-semibold text-gray-500">Email</label>
+                                                        <input v-model="form.email" type="text" id="email"
+                                                               class="form-input w-full mt-1">
+                                                        <div v-cloak
+                                                             v-if="v$.form.email?.$invalid && v$.form.email?.$dirty"
+                                                             class="text-danger text-xs mt-1">
+                                                            [[ v$.form.email?.$errors[0]?.$message ]]
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="flex space-x-3">
+                                                    <!-- Name -->
+                                                    <div class="w-1/2">
+                                                        <label for="code"
+                                                               class="font-semibold text-gray-500">Code</label>
+                                                        <input v-model="form.code" type="text" id="code"
+                                                               class="form-input w-full mt-1">
+                                                        <div v-cloak
+                                                             v-if="v$.form.code?.$invalid && v$.form.code?.$dirty"
+                                                             class="text-danger text-xs mt-1">
+                                                            [[ v$.form.code?.$errors[0]?.$message ]]
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Email -->
+                                                    <div class="w-1/2">
+                                                        <label for="password"
+                                                               class="font-semibold text-gray-500">Password</label>
+                                                        <input v-model="form.password" type="password" id="password"
+                                                               class="form-input w-full mt-1">
+                                                        <div v-cloak
+                                                             v-if="v$.form.password?.$invalid && v$.form.password?.$dirty"
+                                                             class="text-danger text-xs mt-1">
+                                                            [[ v$.form.password?.$errors[0]?.$message ]]
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Second Row: Phone and Gender -->
+                                                <div class="flex space-x-3">
+                                                    <!-- Phone -->
+                                                    <div class="w-1/2">
+                                                        <label for="phone"
+                                                               class="font-semibold text-gray-500">Phone</label>
+                                                        <input v-model="form.phone" type="text" id="phone"
+                                                               class="form-input w-full mt-1">
+                                                        <div v-cloak
+                                                             v-if="v$.form.phone?.$invalid && v$.form.phone?.$dirty"
+                                                             class="text-danger text-xs mt-1">
+                                                            [[ v$.form.phone?.$errors[0]?.$message ]]
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Gender -->
+                                                    <div class="w-1/2">
+                                                        <label for="gender"
+                                                               class="font-semibold text-gray-500">Gender</label>
+                                                        <select v-model="form.gender" id="gender"
+                                                                class="form-input w-full mt-1">
+                                                            <option value="M">Male</option>
+                                                            <option value="F">Female</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Third Row: Role and Status -->
+                                                <div class="flex space-x-3">
+                                                    <!-- Role -->
+                                                    <div class="w-1/2">
+                                                        <label for="role"
+                                                               class="font-semibold text-gray-500">Role</label>
+                                                        <select v-model="form.role" id="role"
+                                                                class="form-input w-full mt-1">
+                                                            <option value="0">User</option>
+                                                            <option value="1">Admin</option>
+                                                        </select>
+                                                    </div>
+
+                                                    <!-- Status -->
+                                                    <div class="w-1/2">
+                                                        <label for="status"
+                                                               class="font-semibold text-gray-500">Status</label>
+                                                        <select v-model="form.status" id="status"
+                                                                class="form-input w-full mt-1">
+                                                            <option value="0">Inactive</option>
+                                                            <option value="1">Active</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Fourth Row: Address -->
+                                                <div>
+                                                    <label for="address"
+                                                           class="font-semibold text-gray-500">Address</label>
+                                                    <textarea v-model="form.address" id="address"
+                                                              class="form-input w-full mt-1" rows="6"></textarea>
+                                                    <div v-cloak
+                                                         v-if="v$.form.address?.$invalid && v$.form.address?.$dirty"
+                                                         class="text-danger text-xs mt-1">
+                                                        [[ v$.form.address?.$errors[0]?.$message ]]
+                                                    </div>
+                                                </div>
+
+                                                <!-- Submit Button -->
+                                                <div class="text-end">
+                                                    <button type="submit"
+                                                            class="border border-pink/20 btn bg-pink/20 text-pink hover:bg-pink hover:text-white px-6 py-2 rounded-md">
+                                                        [[ isEditing ? 'Update User' : 'Create User' ]]
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </Transition>
+                        <Transition name="fade">
+                            <div v-show="isModalOpen"
+                                 class="transition-all fixed inset-0 z-40 bg-gray-900 bg-opacity-50 dark:bg-opacity-80"
+                                 data-fc-overlay-backdrop="" @click="toggleModal">
+                            </div>
+                        </Transition>
+                    </div>
+                </div>
+
+                <!-- Product Table -->
+                <div class="overflow-x-auto">
+                    <div class="min-w-full inline-block align-middle">
+                        <div class="overflow-hidden">
+                            <div class="gridjs-head">
+                                <div class="gridjs-search"><input type="search" id="keyword"
+                                                                  v-model="keyword"
+                                                                  @input="fetchUser"
+                                                                  placeholder="Type a keyword..."
+                                                                  class="gridjs-input gridjs-search-input">
+                                </div>
+                            </div>
+
+                            <div v-show="users.length > 0 && !loading" role="complementary"
+                                 class="gridjs gridjs-container" style="width: 100%;">
+                                <div class="gridjs-wrapper" style="height: auto;">
+                                    <table role="grid" class="gridjs-table" style="height: auto;">
+                                        <thead class="gridjs-thead">
+                                        <tr class="gridjs-tr">
+                                            <th data-column-id="id" class="gridjs-th text-center"
+                                                style="min-width: 60px; max-width: 100px;width: 80px;">
+                                                <div class="gridjs-th-content">Id</div>
+                                            </th>
+                                            <th data-column-id="profile" class="gridjs-th text-center"
+                                                style="min-width:  60px;width: 120px;">
+                                                <div class="gridjs-th-content">Profile</div>
+                                            </th>
+                                            <th data-column-id="name" class="gridjs-th">
+                                                <div class="gridjs-th-content">Name</div>
+                                            </th>
+                                            <th data-column-id="address" class="gridjs-th">
+                                                <div class="gridjs-th-content">Address</div>
+                                            </th>
+                                            <th data-column-id="email" class="gridjs-th" style="width: auto;">
+                                                <div class="gridjs-th-content">Email</div>
+                                            </th>
+                                            <th data-column-id="phone" class="gridjs-th">
+                                                <div class="gridjs-th-content">Phone</div>
+                                            </th>
+                                            <th data-column-id="gender" class="gridjs-th text-center"
+                                                style="min-width: 80px; max-width: 200px; width: 80px;">
+                                                <div class="gridjs-th-content">Gender</div>
+                                            </th>
+                                            <th data-column-id="role" class="gridjs-th text-center"
+                                                style="min-width: 80px; max-width: 200px; width: 80px;">
+                                                <div class="gridjs-th-content">Role</div>
+                                            </th>
+                                            <th data-column-id="status" class="gridjs-th text-center"
+                                                style="min-width: 80px; max-width: 200px; width: 90px;">
+                                                <div class="gridjs-th-content">Status</div>
+                                            </th>
+                                            <th data-column-id="action" class="gridjs-th text-center"
+                                                style="width: 100px;">
+                                                <div class="gridjs-th-content">Action</div>
+                                            </th>
+                                        </tr>
+                                        </thead>
+                                        <tbody class="gridjs-tbody">
+                                        <!-- Loop through users dynamically with Vue -->
+                                        <tr v-for="user in users" :key="user.id" class="gridjs-tr">
+                                            <td data-column-id="id" class="gridjs-td text-center">
+                                                [[ user.id ]]
+                                            </td>
+                                            <td data-column-id="profile" class="gridjs-td text-center">
+                                                <div class="relative inline-block text-center">
+                                                    <!-- Profile Image -->
+                                                    <img v-if="user.profile"
+                                                         @mouseover="showTooltip(user.id)"
+                                                         @mouseleave="hideTooltip"
+                                                         :src="'/static/upload/profile/crop/' + user.profile"
+                                                         alt="Profile Image"
+                                                         class="rounded bg-gray-100 dark:bg-gray-700 dark:border-gray-600 border p-1 h-20 w-20">
+                                                    <img v-else
+                                                         src="https://via.placeholder.com/300x400?text=No+Profile"
+                                                         alt="Profile Image"
+                                                         class="rounded bg-gray-100 dark:bg-gray-700 dark:border-gray-600 border p-1 h-20 w-20">
+
+                                                    <!-- Tooltip -->
+                                                    <transition name="fade"
+                                                                enter-active-class="transition-all duration-300 ease-in-out"
+                                                                enter-class="opacity-0"
+                                                                enter-to-class="opacity-100 scale-100"
+                                                                leave-active-class="transition duration-300 ease-in"
+                                                                leave-class="opacity-100 scale-105"
+                                                                leave-to-class="opacity-0 scale-95">
+                                                        <div v-show="tooltipVisible === user.id"
+                                                             class="absolute top-0 bottom-0 right-0 transform translate-x-full bg-black rounded-lg z-50 shadow-lg flex items-center"
+                                                             :class="{ 'transition-all opacity-100 translate-x-1/2 duration-300': tooltipVisible === user.id }">
+                                                            <div class="w-32">
+                                                                <img
+                                                                        :src="'/static/upload/profile/original/' + user.profile"
+                                                                        alt="Profile Image"
+                                                                        class="rounded bg-gray-100 dark:bg-gray-700 dark:border-gray-600 border p-2 object-cover"
+                                                                >
+                                                            </div>
+
+                                                            <!-- Tooltip Arrow -->
+                                                            <div class="bg-gray-100 dark:bg-gray-700 w-2.5 h-2.5 rotate-45 absolute left-0 top-1/2 -translate-x-1/2"></div>
+                                                        </div>
+                                                    </transition>
+                                                </div>
+                                            </td>
+
+
+                                            <td data-column-id="name" class="gridjs-td">
+                                                [[ user.name ]]
+                                            </td>
+                                            <td data-column-id="address" class="gridjs-td">
+                                                [[ user.address ]]
+                                            </td>
+                                            <td data-column-id="email" class="gridjs-td">
+                                                [[ user.email ]]
+                                            </td>
+                                            <td data-column-id="email" hidden="" class="gridjs-td">
+                                                [[ user.password ]]
+                                            </td>
+                                            <td data-column-id="phone" class="gridjs-td">
+                                                [[ user.phone ]]
+                                            </td>
+                                            <td data-column-id="gender" class="gridjs-td text-center">
+                                                [[ user.gender === 'M' ? 'Male' : 'Female' ]]
+                                            </td>
+                                            <td data-column-id="role" class="gridjs-td text-center">
+                                                [[ user.role == 0 ? 'User' : 'Admin' ]]
+                                            </td>
+                                            <td data-column-id="status" class="gridjs-td text-center">
+                                                [[ user.status == 1 ? 'Active' : 'Inactive' ]]
+                                            </td>
+                                            <td data-column-id="action" class="gridjs-td text-center">
+                                                <button
+                                                        @click="editUser(user)"
+                                                        class="text-lg text-primary hover:text-blue-700 focus:ring focus:ring-blue-300 rounded-md p-1"
+                                                        title="Edit">
+                                                    <i class="fas fa-edit"></i> <!-- FontAwesome Edit Icon -->
+                                                </button>
+                                                <button
+                                                        @click="deleteUser(user.id)"
+                                                        class="text-danger text-lg hover:text-red-700 focus:ring focus:ring-red-300 rounded-md p-1 ml-2"
+                                                        title="Delete">
+                                                    <i class="fas fa-trash-alt"></i> <!-- FontAwesome Delete Icon -->
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="gridjs-footer">
+                                    <div class="gridjs-pagination">
+                                        <div role="status" aria-live="polite" class="gridjs-summary"
+                                             title="Page [[ currentPage ]] of [[ Math.ceil(totalUsers / itemsPerPage) ]]">
+                                            Showing <b>[[ ((currentPage - 1) * itemsPerPage) + 1 ]]</b> to <b>[[
+                                            currentPage * itemsPerPage ]]</b> of <b>[[ totalUsers ]]</b> results
+                                        </div>
+                                        <div class="gridjs-pages">
+                                            <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1"
+                                                    class="gridjs-previous">
+                                                Previous
+                                            </button>
+                                            <button @click="changePage(currentPage + 1)"
+                                                    :disabled="currentPage * itemsPerPage >= totalUsers"
+                                                    class="gridjs-nextPage">
+                                                Next
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div v-if="loading" v-cloak
+                                 class="mt-5 mb-5 flex justify-center items-center bg-white/75 dark:bg-gray-900/75 z-50">
+                                <div class="animate-spin inline-block w-8 h-8 border-[3px] border-current border-t-transparent text-pink rounded-full"
+                                     role="status" aria-label="loading">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                            </div>
+                            <div v-if="users.length === 0 && loading ===false" v-cloak
+                                 class="mt-5 flex justify-center items-center bg-white/75 dark:bg-gray-900/75 z-50">
+                                The list is empty
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Crop Modal -->
+        <!-- Image Crop Modal -->
+        <div
+                v-show="isCropModal" @click.self="triggerError" v-cloak
+                class="w-full h-full fixed top-0 left-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center"
+        >
+            <audio id="crop-sound" src="{{ url_for('static', filename='admin/assets/audio/error.mp3') }}"
+                   preload="auto"></audio>
+
+            <div
+                    :class="[
+                        'w-full max-w-lg bg-dark text-white shadow-lg',
+                        isCropModal ? 'transform transition-all scale-100 opacity-100' : 'transform transition-all scale-90 opacity-0', // Smooth scale and fade-in/out
+                        showError ? 'transform scale-105 opacity-100 transition-all duration-300 ease-in-out' : ''
+        ]"
+            >
+                <!-- Modal Header -->
+                <div class="flex justify-center items-center py-3 px-5 bg-pink/20 dark:border-gray-700">
+                    <h3 class="text-lg font-medium">
+                        Crop Image
+                    </h3>
+                </div>
+
+                <!-- Modal Body (Image Cropper) -->
+                <div class="p-4 bg-dark text-white">
+                    <div class="relative">
+                        <img ref="cropperImage" :src="imageUrl" alt="Image to Crop" class="w-full rounded-md"/>
+                    </div>
+                </div>
+
+                <!-- Modal Footer (Actions) -->
+                <div class="flex justify-end items-center gap-2 p-4 border-t bg-dark border-white/5">
+                    <button @click="cancelCrop" type="button"
+                            class="btn border-danger text-danger hover:bg-danger hover:text-white">
+                        Cancel
+                    </button>
+                    <button @click="cropImage" type="button"
+                            class="btn border-pink text-pink hover:bg-pink hover:text-white">
+                        Crop
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+    </main>
+
+{% endblock %}
+
+{% block customJs %}
+    <!-- Include Vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-demi"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@vuelidate/core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@vuelidate/validators"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='admin/assets/libs/gridjs/gridjs.umd.js') }}"></script>
+
+    {#    <script src="{{ url_for('static', filename='admin/assets/js/app.js') }}"></script>#}
+
+
+    <script type="module">
+        const {createApp, ref} = Vue
+        const {useVuelidate} = Vuelidate;
+        const {required, minLength, maxLength, qty, helpers, email} = VuelidateValidators;
+        import {
+            initializeCropper,
+            compressFile
+        } from "{{ url_for('static', filename='admin/assets/mycustomJs/cropperModule.js') }}";
+
+        createApp({
+            delimiters: ['[[', ']]'], // Change the default delimiters
+            data() {
+                return {
+                    isModalOpen: false,
+                    message: "working",
+                    users: [],
+                    loading: false,
+                    imageUrl: null,
+                    croppedImage: null,
+                    isCropModal: false,
+                    showError: false,
+                    cropperInstance: null,
+                    originalImage: null,
+                    formErrors: "",
+                    form: {
+                        id: null,
+                        name: '',
+                        code: '',
+                        password: null,
+                        email: '',
+                        phone: '',
+                        gender: 'M', // Default gender as 'Male'
+                        role: '0',   // Default role as 'User'
+                        status: '0', // Default status as 'Inactive'
+                        address: '',
+                        profile: null  // To store the selected profile image
+                    },
+                    currentPage: 1,
+                    itemsPerPage: 10,
+                    totalUsers: 0,
+                    totalPages: 0,
+                    pages: [],
+                    keyword: "",
+                    isEditing: false,
+                    CroppedImageURL: '', // Define the property
+                    tooltipVisible: false, // Controls visibility of the tooltip
+                    tooltipPosition: {
+                        left: 0,  // X Position of the tooltip
+                        top: 0    // Y Position of the tooltip
+                    }
+                };
+            },
+            validations() {
+                return {
+                    form: {
+                        name: {
+                            required: helpers.withMessage("Name is required", required),
+                            minLength: helpers.withMessage("Name must be at least 4 characters", minLength(3)),
+                        },
+                        code: {
+                            required: helpers.withMessage("Code is required", required),
+                        },
+                        password: {
+                            required: helpers.withMessage("Password is required", required),
+                            minLength: helpers.withMessage("Password must be at least 8 characters", minLength(8)),
+                        },
+                        email: {
+                            required: helpers.withMessage("Email is required", required),
+                            email: helpers.withMessage("Email must be valid", email),
+                        },
+                        phone: {
+                            required: helpers.withMessage("Phone number is required", required),
+                        },
+                        gender: {
+                            required: helpers.withMessage("Gender is required", required),
+                        },
+                        role: {
+                            required: helpers.withMessage("Role is required", required),
+                        },
+                        status: {
+                            required: helpers.withMessage("Status is required", required),
+                        },
+                        address: {
+                            required: helpers.withMessage("Address is required", required),
+                        },
+                    }
+                };
+            },
+            setup() {
+                return {
+                    v$: useVuelidate(),
+                };
+            },
+            mounted() {
+                this.fetchUser()
+            },
+            methods: {
+                fetchUser() {
+                    this.loading = true;
+                    axios.get(`/api/get/user`, {
+                        params: {
+                            page: this.currentPage,       // Current page for pagination
+                            limit: this.itemsPerPage,     // Number of items per page
+                            keyword: this.keyword, // Keyword for search (trimmed to remove extra spaces)
+                        }
+                    }).then(response => {
+                        this.loading = false;
+                        this.users = response.data.user;
+                        this.totalUsers = response.data.totalCount;
+                        this.totalPages = response.data.totalPages;
+                        this.pages = response.data.pages; // Get the page numbers (e.g., [3, 4, 5, 6, 7])
+
+                        // Update pagination buttons dynamically
+                        this.updatePagination();
+                    })
+                        .catch(error => {
+                            this.loading = false;
+                            console.error('Error fetching users:', error);
+                        });
+                },
+                // Method to handle page change (click on page number or next/previous)
+                goToPage(page) {
+                    if (page > 0 && page <= this.totalPages) {
+                        this.currentPage = page;
+                        this.fetchUser(); // Fetch users for the selected page
+                    }
+                },
+
+                // Method to update the pagination buttons dynamically
+                updatePagination() {
+                    const paginationButtons = document.querySelector('.gridjs-pages');
+                    paginationButtons.innerHTML = '';  // Clear previous buttons
+
+                    // Create Previous button
+                    const prevButton = document.createElement('button');
+                    prevButton.textContent = 'Previous';
+                    prevButton.disabled = this.currentPage === 1;
+                    prevButton.addEventListener('click', () => this.goToPage(this.currentPage - 1));
+                    paginationButtons.appendChild(prevButton);
+
+                    // Create page number buttons (show 5 pages)
+                    this.pages.forEach(page => {
+                        const pageButton = document.createElement('button');
+                        pageButton.setAttribute('aria-label', `Page ${page}`);
+                        pageButton.textContent = page;
+                        pageButton.addEventListener('click', () => this.goToPage(page));
+
+                        // Highlight the current page
+                        if (page === this.currentPage) {
+                            pageButton.classList.add('gridjs-currentPage');
+                        }
+
+                        paginationButtons.appendChild(pageButton);
+                    });
+
+                    // Create Next button
+                    const nextButton = document.createElement('button');
+                    nextButton.textContent = 'Next';
+                    nextButton.disabled = this.currentPage === this.totalPages;
+                    nextButton.addEventListener('click', () => this.goToPage(this.currentPage + 1));
+                    paginationButtons.appendChild(nextButton);
+                },
+
+                handleImageUpload(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        this.imageUrl = URL.createObjectURL(file); // Display the selected image in the crop modal
+                        this.isCropModal = true; // Open the crop modal
+                        this.$nextTick(() => {
+                            // Initialize Cropper.js
+                            if (this.cropperInstance) {
+                                this.cropperInstance.destroy();
+                            }
+                            const imageElement = this.$refs.cropperImage;
+                            this.originalFile = file;
+                            this.cropperInstance = new initializeCropper(imageElement, NaN);
+                        });
+                    } else {
+                        this.formErrors = "No file selected.";
+                    }
+                },
+                blobUrlToFile(blobUrl, filename) {
+                    return fetch(blobUrl)
+                        .then(response => response.blob())
+                        .then(blob => {
+                            const file = new File([blob], filename, {type: blob.type});
+                            return file;
+                        })
+                        .catch(error => {
+                            console.error("Error converting blob URL to file:", error);
+                            return null; // Handle the error if necessary
+                        });
+                },
+
+                // Crop image and send it to the server
+                async cropImage() {
+                    console.log('Crop button clicked');
+                    if (this.cropperInstance) {
+                        // Get the compressed cropped data URL from the cropper
+                        this.croppedImage = await this.cropperInstance.getCompressedCroppedDataURL();
+                        this.CroppedImageURL = this.croppedImage; // Save the cropped image URL
+
+                        // Convert the blob URL to a file
+                        const croppedFile = await this.blobUrlToFile(this.CroppedImageURL, "cropped-image.jpeg");
+
+                        if (!croppedFile) {
+                            console.error("Failed to convert blob URL to file");
+                            return;
+                        }
+
+                        // Prepare the FormData and append the cropped file
+                        const formData = new FormData();
+                        formData.append('cropped_image', croppedFile); // Append cropped image
+                        if (this.checkImageSize(this.originalFile, 2)) {
+                            try {
+                                const compressedFile = await compressFile(this.originalFile, 0.7);
+                                console.log('Original File:', this.originalFile);
+                                console.log('Compressed File:', compressedFile);
+                                this.originalFile = compressedFile;
+                                formData.append('original_image', this.originalFile); // Append compressed original image
+                                console.log('uploading with compression');
+                            } catch (compressionError) {
+                                console.error('Compression failed:', compressionError);
+                                return; // Stop further processing if compression fails
+                            }
+                        } else {
+                            // If the image is not larger than 2MB, just upload the original image
+                            formData.append('original_image', this.originalFile); // Append compressed original image
+                            console.log('Image is smaller than 2MB, uploading without compression');
+                        }
+                        axios.post('/admin/api/upload-temp-image/create', formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                            },
+                        })
+                            .then(response => {
+                                console.log('Image ID:', response.data.image_id); // Handle the response
+                                this.form.profile = response.data.image_id;
+                            })
+                            .catch(error => {
+                                console.error('Error uploading image:', error); // Handle errors
+                            });
+
+
+                        console.log(this.form.profile);
+                        this.isCropModal = false;
+
+                        this.cropperInstance.destroy();
+                        this.cropperInstance = null;
+                    }
+                },
+                checkImageSize(file, maxSizeMB) {
+                    // Convert maxSizeMB to bytes (1MB = 1024 * 1024 bytes)
+                    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+                    return file.size > maxSizeBytes; // Returns true if the file is larger than the max size
+                },
+                // Cancel Cropping
+                cancelCrop() {
+                    this.isCropModal = false; // Close the modal
+                    if (this.cropperInstance) {
+                        this.cropperInstance.destroy(); // Destroy Cropper instance
+                        this.cropperInstance = null;
+                    }
+                },
+
+                triggerError() {
+                    const audio = document.getElementById('crop-sound');
+                    audio.play();
+
+                    this.showError = true;
+
+                    setTimeout(() => {
+                        this.showError = false;
+                    }, 300);  // Pop animation duration
+                },
+
+                submitForm() {
+                    this.v$.$touch(); // Mark all fields as touched
+                    if (this.v$.$invalid) {
+                        console.error("Validation errors present");
+                        return; // Stop submission if form is invalid
+                    }
+                    if (this.isEditing) {
+                        this.updateUser(this.form.id);
+                    } else {
+                        this.createUser();
+                    }
+                },
+
+                async blobToBase64(blobURL) {
+                    const response = await fetch(blobURL);
+                    const blob = await response.blob();
+                    return new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob); // This will return a Base64 string
+                    });
+                },
+
+                createUser() {
+                    this.loading = true;// Assuming the backend sends users data as an array
+                    axios.post('/api/add/user', this.form, {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(response => {
+                            if (response.status >= 200 && response.status < 300) {
+                                // Handle the success case
+                                this.clearForm();
+                                this.toggleModal();
+                                this.showSuccessAlert("Success", "User added successfully", "success"); // Call this function when you want to trigger the alert
+                                this.fetchUser(); // Refresh users
+                                this.loading = false; // Hide loading indicator
+                                console.log('User added successfully:', response.data);
+                            } else {
+                                // Handle the error case (non-2xx status)
+                                this.loading = false;
+                                console.error('Error adding user:', response.data);
+                            }
+                        }
+                    )
+                        .catch(error => {
+                            this.loading = false;// Assuming the backend sends users data as an array
+                            console.error('Error adding users:', error);
+                        });                    // Add your submission logic here
+                },
+
+                editUser(user) {
+                    this.form.id = user.id;  // Store the user ID for submitting the update
+                    this.form.name = user.name;  // Pre-fill the name
+                    this.form.code = user.code;  // Pre-fill the code
+                    this.form.password = user.password;  // Pre-fill the password (or you may not pre-fill this for security)
+                    this.form.email = user.email;  // Pre-fill the email
+                    this.form.phone = user.phone;  // Pre-fill the phone
+                    this.form.gender = user.gender;  // Pre-fill the gender
+                    this.form.role = user.role;  // Pre-fill the role
+                    this.form.status = user.status;  // Pre-fill the status
+                    this.form.address = user.address;  // Pre-fill the address
+                    this.form.profile = user.profile;  // Pre-fill the profile (optional, depending on your app design)
+                    this.isEditing = true;
+                    this.toggleModal();
+                },
+
+                updateUser(id) {
+                    axios.put(`/api/update/user/${id}`, this.form, {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(response => {
+                        if (response.status >= 200 && response.status < 300) {
+                            this.clearForm();
+                            this.toggleModal();
+                            this.showSuccessAlert("Success", "User updated successfully", "success");
+                            this.fetchUser();
+                            console.log('User updated successfully:', response.data);
+                        } else {
+                            console.error('Error updating user:', response.data);
+                        }
+                    })
+                },
+
+                deleteUser(id) {
+                    // Show SweetAlert confirmation modal
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: 'You won\'t be able to revert this!',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Proceed with deletion if the user confirmed
+                            axios.delete(`/api/delete/user/${id}`).then(response => {
+                                if (response.status >= 200 && response.status < 300) {
+                                    // Show success message
+                                    Swal.fire(
+                                        'Deleted!',
+                                        'Your user has been deleted.',
+                                        'success'
+                                    );
+                                    this.fetchUser();  // Refresh users list after deletion
+                                    console.log('User deleted successfully:', response.data);
+                                } else {
+                                    console.error('Error deleting user:', response.data);
+                                }
+                            }).catch(error => {
+                                console.error('Error deleting user:', error);
+                                Swal.fire(
+                                    'Error!',
+                                    'There was an issue deleting the user.',
+                                    'error'
+                                );
+                            });
+                        }
+                    });
+                },
+
+                // Method to reset the form
+                clearForm() {
+                    // Reset form fields to their initial values
+                    this.$refs.profileInput.value = ''; // Reset the input value
+                    this.form.name = '';
+                    this.form.address = '';
+                    this.form.email = '';
+                    this.form.phone = '';
+                    this.form.gender = 'M'; // Or whatever default value is for gender
+                    this.form.role = '0';    // Default role
+                    this.form.status = '0';  // Default status
+                    this.form.profile = '';
+                    this.form.code = '';
+                    this.form.password = '';
+                    this.imageUrl = null;
+                    this.croppedImage = null;
+                    this.isCropModal = false;
+                    this.showError = false;
+                    this.cropperInstance = null;
+                    this.CroppedImageURL = null;
+
+
+                    // Reset the validation state
+                    this.isEditing = false;
+                    this.v$.$reset(); // Reset all validation states to initial
+                },
+                showTooltip(userId) {
+                    this.tooltipVisible = userId;
+                },
+                // Hide the tooltip
+                hideTooltip() {
+                    this.tooltipVisible = null;
+                },
+                showSuccessAlert(title, text, icon) {
+                    Swal.fire({
+                        title: title,
+                        text: text,
+                        icon: icon,
+                        showCloseButton: true
+                    });
+                },
+
+                changePage(page) {
+                    if (page < 1 || page > Math.ceil(this.totalUsers / this.itemsPerPage)) return;
+                    this.currentPage = page;
+                    this.fetchUser();  // Re-fetch users for the new page
+                },
+
+                toggleCreateModal() {
+                    this.clearForm();
+                    this.isModalOpen = !this.isModalOpen; // Toggles modal open/close
+                },
+
+                toggleModal() {
+                    this.isModalOpen = !this.isModalOpen; // Toggles modal open/close
+                },
+
+                beforeEnter(el) {
+                    // Set the modal off-canvas initially at the bottom (down)
+                    el.style.transform = 'translateY(100%)'; // Start from below the screen
+                    el.style.opacity = 0; // Make the modal invisible
+                }
+                ,
+                enter(el, done) {
+                    // Trigger reflow to ensure the transition happens
+                    el.offsetHeight; // This is necessary to trigger the CSS transition
+
+                    // Now, animate the modal from the bottom (translateY(100%)) to the center (translateY(0))
+                    el.style.transition = 'transform 0.5s ease-out, opacity 0.5s ease-out';
+                    el.style.transform = 'translateY(0)'; // Move the modal to the center
+                    el.style.opacity = 1; // Fade in the modal
+
+                    done(); // Transition is done
+                }
+                ,
+                leave(el, done) {
+                    // Transition the modal upwards (off-screen)
+                    el.style.transition = 'transform 0.5s ease-in, opacity 0.5s ease-in';
+                    el.style.transform = 'translateY(-100%)'; // Move the modal off the screen upwards
+                    el.style.opacity = 0; // Fade out the modal
+
+                    // Delay the removal from the DOM until the animation is complete
+                    setTimeout(() => {
+                        done(); // Call done after the transition is complete
+                    }, 500); // Match the duration of the transition (500ms)
+                }
+            }
+        }).mount('#app');
+
+    </script>
+
+    <style scoped>
+        /* Modal transition styles inside Vue component */
+        .modal-enter-active,
+        .modal-leave-active {
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+        }
+
+        .modal-enter, .modal-leave-to /* .modal-leave-active in <2.1.8 */
+        {
+            transform: translateY(100%); /* Start below the screen */
+            opacity: 0; /* Start as invisible */
+        }
+
+        .modal-leave {
+            transform: translateY(-100%); /* Move off the screen upwards */
+            opacity: 0; /* Fade out */
+        }
+    </style>
+{% endblock %}

@@ -1,0 +1,56 @@
+<div class="app-menu">
+
+    <!-- Sidenav Brand Logo -->
+    <a href="{{ url_for('dashboard') }}" class="logo-box">
+        <!-- Light Brand Logo -->
+
+    </a>
+
+
+    <!--- Menu -->
+    <div data-simplebar>
+        <!-- User Box -->
+        <div class="user-box relative text-center">
+            <div class="rounded-full h-14 w-14 p-1 border border-gray-300/30 flex items-center justify-center mx-auto mb-3 text-center bg-gray-100 text-gray-700 font-medium">
+                Molobber
+            </div>
+
+
+        </div>
+
+        <ul class="menu" data-fc-type="accordion">
+            <li class="menu-title">Navigation</li>
+
+{#            <li class="menu-item">#}
+{#                <a href="{{ url_for('dashboard') }}" class="menu-link">#}
+{#                    <span class="menu-icon"><i class="mdi mdi-view-dashboard-outline"></i></span>#}
+{#                    <span class="menu-text"> Dashboard </span>#}
+{#                </a>#}
+{#            </li>#}
+            <li class="menu-item">
+                <a href="{{ url_for('user_list') }}" class="menu-link">
+                    <span class="menu-icon"><i class="mdi mdi-account-outline"></i></span>
+                    <span class="menu-text"> User </span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="{{ url_for('categories_list') }}" class="menu-link">
+                    <span class="menu-icon"><i class="mdi mdi-file-tree-outline"></i></span>
+                    <span class="menu-text"> Category </span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="{{ url_for('products_list') }}" class="menu-link">
+                    <span class="menu-icon"><i class="mdi mdi-tag-outline"></i></span>
+                    <span class="menu-text"> Product </span>
+                </a>
+            </li>
+{#            <li class="menu-item">#}
+{#                <a href="{{ url_for('dashboard') }}" class="menu-link">#}
+{#                    <span class="menu-icon"><i class="mdi mdi-view-dashboard-outline"></i></span>#}
+{#                    <span class="menu-text"> Dashboard </span>#}
+{#                </a>#}
+{#            </li>#}
+        </ul>
+    </div>
+</div>
